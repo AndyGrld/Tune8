@@ -7,6 +7,7 @@ const { promisify } = require("util");
 const { resolve } = require("path");
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
+process.env.CLIENT_SECRET;
 const musicLocation = localStorage.getItem("MusicPath");
 const music_folder = musicLocation ? localStorage.getItem("MusicPath") : "";
 const songsSavedData = "C:\\Music_Data\\songsSavedData";
@@ -24,6 +25,14 @@ async function createFoldersIfNotExist() {
     } catch (error) {
       console.error(`Error creating folder ${folder}:`, error);
     }
+  }
+}
+function createDirectoryIfNotExists(directoryPath) {
+  const success = ipcRenderer.sendSync("create-directory", directoryPath);
+  if (success) {
+    console.log(`Directory created: ${directoryPath}`);
+  } else {
+    console.error(`Error creating directory: ${directoryPath}`);
   }
 }
 async function deleteFilesInFolder(folderPath) {
@@ -46,13 +55,13 @@ async function getFiles(dir) {
   }));
   return files.reduce((a, f) => a.concat(f), []);
 }
-async function saveDataToFile(data, savePath) {
+async function saveDataToFile(data, savePath, FileName = "musicData_") {
   const chunks = Math.ceil(data.length / 20);
   for (let i = 0; i < chunks; i++) {
     const start = i * 20;
     const end = (i + 1) * 20;
     const chunkData = data.slice(start, end);
-    const fileName = `musicData_${i + 1}.json`;
+    const fileName = `${FileName}${i + 1}.json`;
     const filePath = path.join(savePath, fileName);
     try {
       await fs.writeFile(filePath, JSON.stringify(chunkData, null, 2));
@@ -61,7 +70,7 @@ async function saveDataToFile(data, savePath) {
     }
   }
 }
-async function readFromFile(savePath) {
+async function readFromFile(savePath, single = false) {
   const files = await fs.readdir(savePath);
   if (files.length === 0) {
     return [];
@@ -107,7 +116,7 @@ contextBridge.exposeInMainWorld("electron", {
   saveQueue: async (queue) => {
     try {
       await deleteFilesInFolder(queueSavedData);
-      await saveDataToFile(queue, queueSavedData);
+      await saveDataToFile(queue, queueSavedData, "queueData_");
       return true;
     } catch (error) {
       console.error("Error saving to file: ", error);
@@ -119,6 +128,37 @@ contextBridge.exposeInMainWorld("electron", {
       return musicData;
     } catch (error) {
       console.error("Error reading from file: ", error);
+    }
+  },
+  getLyrics: async (song) => {
+    try {
+      const lyricsFileName = `${song.tag.tags.title}.json`;
+      const lyricsFolderPath = path.join(lyricsSavedData, song.tag.tags.album);
+      createDirectoryIfNotExists(lyricsFolderPath);
+      const lyricsFilePath = path.join(lyricsFolderPath, lyricsFileName);
+      try {
+        const lyricsFileContent = await fs.readFile(lyricsFilePath, "utf8");
+        console.log("Lyrics found in file:", lyricsFileContent);
+        return lyricsFileContent;
+      } catch (readError) {
+        console.log("Lyrics file not found, fetching from API:", readError);
+      }
+      const response = await fetch(
+        `https://api.lyrics.ovh/v1/${song.tag.tags.artist}/${song.tag.tags.title}`
+      );
+      const data = await response.json();
+      if (data.lyrics !== void 0) {
+        const lyrics = data.lyrics;
+        await fs.writeFile(lyricsFilePath, lyrics, "utf8");
+        console.log("Lyrics saved to file:", lyricsFilePath);
+        return lyrics;
+      } else {
+        console.log("Lyrics not found");
+        return "not found";
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+      return null;
     }
   },
   addMusicDirectory: async () => {

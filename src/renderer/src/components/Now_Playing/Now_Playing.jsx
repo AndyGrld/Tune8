@@ -18,9 +18,18 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
 
     function displayLyrics(){
         showLyrics()
-        const newLyrics = await window.electron.getLyrics(currentSong)
         setViewLyrics(true)
     }
+
+    useEffect(() => {
+        const fetchLyrics = async () => {
+            const newLyrics = await window.electron.getLyrics(currentSong);
+            setSongLyrics(newLyrics);
+            console.log("new lyrics: ", newLyrics);
+        };
+        fetchLyrics();
+    }, [currentSong]);
+
     function HideNowPlaying(){
         setViewLyrics(false)
         hideNowPlaying()
@@ -178,30 +187,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                 </div>
                 <div className="lyrics">
                     <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Unde ad, sequi corrupti, maxime voluptates fugit dignissimos
-                        sit fugiat molestiaedistinctio voluptatibus, eaque
-                        blanditiis vero illum facere magnam debitis ipsum magni
-                        quisquam iste? Vero quisquam, tempore obcaecati tempora
-                        eligendi illo. Doloremque quidem neque earum numquam nostrum
-                        provident, veniam recusandae quae. Hic ratione obcaecati perspiciatis
-                        libero, eligendi eaque saepe debitis laudantium amet commodi
-                        voluptatibus quam assumenda animi quo iusto voluptates provident
-                        nobis dolore! Quaerat nihil aliquam tenetur! Expedita nemo voluptates
-                        vitae repellat quos facere similique cumque sed, voluptate numquam!
-                        Minus amet, qui cum sequi quae omnis doloremque consequuntur velit
-                        nesciunt ab temporibus nulla quia. Consequuntur omnis quas praesentium
-                        expedita deleniti vitae at deserunt accusamus placeat esse, nam laudantium
-                        corporis blanditiis dicta, hic fuga nobis odio velit vero natus! Sint ad
-                        quasi quam vel sequi quis? Tempora dolorum mollitia a laboriosam vel amet
-                        nemo odit ab nostrum, nisi facilis perferendis doloremque unde pariatur
-                        quaerat distinctio quasi,
-                        blanditiis ratione commodi, quisquam delectus voluptate soluta.
-                        Quidem quaerat, eveniet nam consequuntur dolore iure. Soluta
-                        consequuntur voluptatem numquam, doloremque, quia molestias necessitatibus
-                        quos dolor blanditiis deserunt, dicta odio nihil deleniti magnam officia enim
-                        sapiente corporis exercitationem sint provident quidem autem nulla. Temporibus
-                        veniam dolores veritatis odio pariatur!
+                        {songLyrics}
                     </p>
                 </div>
             </div>

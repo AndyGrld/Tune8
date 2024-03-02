@@ -7,7 +7,7 @@ const { promisify } = require('util')
 const { resolve } = require('path')
 const readdir = promisify(fs.readdir)
 const stat = promisify(fs.stat)
-require('dotnet').config()
+// require('dotnet').config()
 
 const apiKey = process.env.CLIENT_SECRET
 
@@ -34,6 +34,16 @@ async function createFoldersIfNotExist() {
         } catch (error) {
             console.error(`Error creating folder ${folder}:`, error);
         }
+    }
+}
+
+function createDirectoryIfNotExists(directoryPath) {
+    // Send request to create directory to main process
+    const success = ipcRenderer.sendSync('create-directory', directoryPath);
+    if (success) {
+        console.log(`Directory created: ${directoryPath}`);
+    } else {
+        console.error(`Error creating directory: ${directoryPath}`);
     }
 }
 
@@ -148,25 +158,40 @@ contextBridge.exposeInMainWorld('electron', {
         }
     },
     getLyrics: async (song) => {
-        try{
-            // const fileName = `${song.tag.tags.title}_${song.tag.tags.album}`
-            // const lyricsData = readJsonFile(fileName+'.json')
-            // if(lyricsData.lyrics){
-            //     return lyricsData.lyrics
-            // }
-            fetch(
+        try {
+            const lyricsFileName = `${song.tag.tags.title}.json`;
+            const lyricsFolderPath = path.join(lyricsSavedData, song.tag.tags.album);
+            createDirectoryIfNotExists(lyricsFolderPath)
+            const lyricsFilePath = path.join(lyricsFolderPath, lyricsFileName);
+            
+            // Check if the lyrics file already exists
+            try {
+                const lyricsFileContent = await fs.readFile(lyricsFilePath, 'utf8');
+                console.log('Lyrics found in file:', lyricsFileContent);
+                return lyricsFileContent;
+            } catch (readError) {
+                // File does not exist or cannot be read
+                console.log('Lyrics file not found, fetching from API:', readError);
+            }
+    
+            // Fetch lyrics from API
+            const response = await fetch(
                 `https://api.lyrics.ovh/v1/${song.tag.tags.artist}/${song.tag.tags.title}`
-            ).then(response => response.json())
-            .then(data => {
-                if(data.lyrics !== undefined){
-                    console.log(data.lyrics)
-                    saveDataToFile(data.lyrics, lyricsSavedData, fileName);
-                }else{
-                    console.log("Lyrics not found")
-                }
-            })
-        }catch(error){
-            console.error('An error occured: ', error)
+            );
+            const data = await response.json();
+            if (data.lyrics !== undefined) {
+                const lyrics = data.lyrics;
+                // Save lyrics to file
+                await fs.writeFile(lyricsFilePath, lyrics, 'utf8');
+                console.log('Lyrics saved to file:', lyricsFilePath);
+                return lyrics;
+            } else {
+                console.log("Lyrics not found");
+                return "not found";
+            }
+        } catch (error) {
+            console.error('An error occurred:', error);
+            return null;
         }
     },
     addMusicDirectory: async () => {

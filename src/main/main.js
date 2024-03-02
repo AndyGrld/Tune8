@@ -18,6 +18,18 @@ async function handleDirectoryOpen() {
         throw error;
     }
 }
+ipcMain.on('create-directory', (event, directoryPath) => {
+    try {
+        // Create the directory
+        fs.mkdirSync(directoryPath, { recursive: true });
+        console.log(`Directory created: ${directoryPath}`);
+        event.returnValue = true;
+    } catch (error) {
+        // Handle error if directory creation fails
+        console.error(`Error creating directory: ${directoryPath}`, error);
+        event.returnValue = false;
+    }
+});
 
 function createWindow(){
     win = new BrowserWindow({

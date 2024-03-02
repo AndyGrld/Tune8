@@ -1,7 +1,7 @@
 "use strict";
 const electron = require("electron");
 const path = require("path");
-require("fs");
+const fs = require("fs");
 function _interopNamespaceDefault(e) {
   const n = Object.create(null, { [Symbol.toStringTag]: { value: "Module" } });
   if (e) {
@@ -34,6 +34,16 @@ async function handleDirectoryOpen() {
     throw error;
   }
 }
+electron.ipcMain.on("create-directory", (event, directoryPath) => {
+  try {
+    fs.mkdirSync(directoryPath, { recursive: true });
+    console.log(`Directory created: ${directoryPath}`);
+    event.returnValue = true;
+  } catch (error) {
+    console.error(`Error creating directory: ${directoryPath}`, error);
+    event.returnValue = false;
+  }
+});
 function createWindow() {
   win = new electron.BrowserWindow({
     width: 1200,
