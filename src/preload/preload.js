@@ -7,6 +7,9 @@ const { promisify } = require('util')
 const { resolve } = require('path')
 const readdir = promisify(fs.readdir)
 const stat = promisify(fs.stat)
+require('dotnet').config()
+
+const apiKey = process.env.CLIENT_SECRET
 
 const musicLocation = localStorage.getItem("MusicPath")
 const music_folder = musicLocation ? localStorage.getItem("MusicPath") : "";
@@ -56,13 +59,13 @@ async function getFiles(dir) {
     return files.reduce((a, f) => a.concat(f), []);
 }
 
-async function saveDataToFile(data, savePath) {
+async function saveDataToFile(data, savePath, FileName = "musicData_") {
     const chunks = Math.ceil(data.length / 20);
     for (let i = 0; i < chunks; i++) {
         const start = i * 20;
         const end = (i + 1) * 20;
         const chunkData = data.slice(start, end);
-        const fileName = `musicData_${i + 1}.json`;
+        const fileName = `${FileName}${i + 1}.json`;
         const filePath = path.join(savePath, fileName);
         try {
             await fs.writeFile(filePath, JSON.stringify(chunkData, null, 2));
@@ -72,7 +75,7 @@ async function saveDataToFile(data, savePath) {
     }
 }
 
-async function readFromFile(savePath){
+async function readFromFile(savePath, single = false){
     const files = await fs.readdir(savePath);
     if(files.length === 0){
         return []
@@ -90,6 +93,16 @@ async function readFromFile(savePath){
         return musicData;
     }else{
         return []
+    }
+}
+function readJsonFile(filePath) {
+    try {
+        const data = fs.readFileSync(filePath, 'utf8');
+        const jsonData = JSON.parse(data);
+        return jsonData;
+    } catch (err) {
+        console.error('Error reading JSON file:', err);
+        return null;
     }
 }
 
@@ -120,7 +133,7 @@ contextBridge.exposeInMainWorld('electron', {
     saveQueue: async (queue) => {
         try{
             await deleteFilesInFolder(queueSavedData);
-            await saveDataToFile(queue, queueSavedData);
+            await saveDataToFile(queue, queueSavedData, "queueData_");
             return true
         }catch(error){
             console.error("Error saving to file: ", error)
@@ -132,6 +145,28 @@ contextBridge.exposeInMainWorld('electron', {
             return musicData
         }catch(error){
             console.error("Error reading from file: ", error)
+        }
+    },
+    getLyrics: async (song) => {
+        try{
+            // const fileName = `${song.tag.tags.title}_${song.tag.tags.album}`
+            // const lyricsData = readJsonFile(fileName+'.json')
+            // if(lyricsData.lyrics){
+            //     return lyricsData.lyrics
+            // }
+            fetch(
+                `https://api.lyrics.ovh/v1/${song.tag.tags.artist}/${song.tag.tags.title}`
+            ).then(response => response.json())
+            .then(data => {
+                if(data.lyrics !== undefined){
+                    console.log(data.lyrics)
+                    saveDataToFile(data.lyrics, lyricsSavedData, fileName);
+                }else{
+                    console.log("Lyrics not found")
+                }
+            })
+        }catch(error){
+            console.error('An error occured: ', error)
         }
     },
     addMusicDirectory: async () => {

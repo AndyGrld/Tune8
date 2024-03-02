@@ -26,3 +26,4 @@ dist-ssr
 
 # my files
 src/renderer/public/*
+.env

@@ -9,6 +9,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
     musicProgress, setMusicProgress, currentSong, queueSongs, currentIndex,
     favoriteSongs, setFavoriteSongs}) => {
     const [viewLyrics, setViewLyrics] = useState(false)
+    const [songLyrics, setSongLyrics] = useState("some lyrics")
 
     function ShuffleAndPlay(){
         const newQueue = shuffleArray(queueSongs)
@@ -17,6 +18,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
 
     function displayLyrics(){
         showLyrics()
+        const newLyrics = await window.electron.getLyrics(currentSong)
         setViewLyrics(true)
     }
     function HideNowPlaying(){
