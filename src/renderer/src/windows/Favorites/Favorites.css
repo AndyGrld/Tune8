@@ -1,0 +1,40 @@
+.favorites_window nav {
+  position: fixed;
+  z-index: 5;
+  height: 90px;
+  width: calc(100% - 200px);
+  padding: 0 10px;
+  left: 200px;
+  color: var(--txt-color);
+  background-color: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 0 10px var(--translucent-black);
+}
+@media (max-width: 700px) {
+  .favorites_window nav {
+    width: calc(100% - 70px);
+    left: 70px;
+  }
+}
+.favorites_window nav h1 {
+  font-size: 1.8em;
+}
+.favorites_window nav #now_playing456 {
+  position: relative;
+  top: -13px;
+}
+.favorites_window nav .nav div {
+  display: flex;
+  gap: 10px;
+}
+.favorites_window nav .nav div button {
+  border: none;
+  background-color: var(--btn-bg-color);
+  color: var(--bg-color);
+  border-radius: 5px;
+  font-size: 0.9em;
+  padding: 5px;
+  cursor: pointer;
+}/*# sourceMappingURL=Favorites.css.map */
