@@ -46,12 +46,13 @@
   margin-bottom: 20px;
 }
 .queue_window ul li {
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr 1fr auto;
   border-radius: 5px;
   height: 40px;
   padding: 5px;
   width: 100%;
   margin: 5px 0;
-  display: flex;
   align-items: center;
   -moz-column-gap: 10px;
        column-gap: 10px;
@@ -63,20 +64,11 @@
   position: relative;
   font-size: 0.9em;
   font-weight: 400;
-  overflow: hidden;
   height: 25px;
-}
-.queue_window ul li .cell2 {
-  width: 35%;
-}
-.queue_window ul li .cell3 {
-  width: 25%;
-}
-.queue_window ul li .cell4 {
-  width: 25%;
-}
-.queue_window ul li .cell5 {
-  width: 5%;
+  line-clamp: 2;
+  text-wrap: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .queue_window ul li .img_div {
   position: relative;
@@ -113,7 +105,7 @@
   background-color: var(--img-brightness-color);
 }
 .queue_window ul .highlight {
-  background-color: var(--sidebar-bg-color) !important;
+  background-color: var(--now-playing) !important;
   color: var(--song-now-playing-color);
   border: 1px solid var(--txt-color);
 }
@@ -128,7 +120,7 @@
 }
 
 @media screen and (max-width: 768px) {
-  .songs_window ul li .cell5 {
+  .queue_window ul li .cell5 {
     display: none;
   }
 }/*# sourceMappingURL=Queue.css.map */

@@ -25,7 +25,7 @@ const App = () => {
   const [musicProgress, setMusicProgress] = useState(0)
   const [allSongs, setAllSongs] = useState([])
   const [queueSongs, setQueueSongs] = useState([])
-  const [theme, setTheme] = useState('dark')
+  const [theme, setTheme] = useState(localStorage.getItem("theme") ?  localStorage.getItem("theme") : 'light')
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [favoriteSongs, setFavoriteSongs] = useState([])
 
@@ -41,6 +41,10 @@ const App = () => {
 
   // fetch all songs on app startup
   useEffect(() => {
+    // const currentTheme = localStorage.getItem("theme")
+    // if(currentTheme){
+    //   setTheme(currentTheme)
+    // }
     fetchItems()
   }, [])
 

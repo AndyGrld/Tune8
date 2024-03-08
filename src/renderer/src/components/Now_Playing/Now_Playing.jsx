@@ -142,7 +142,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                                     </div>
                                 </div>
                                 <div className='time'>
-                                    <h4>4:30</h4>
+                                    <h4>{song.duration}</h4>
                                 </div>
                             </div>
                         ))
@@ -157,7 +157,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                                     </div>
                                 </div>
                                 <div className='time'>
-                                    <h4>4:30</h4>
+                                    <h4>{song.duration}</h4>
                                 </div>
                             </div>
                         ))
@@ -171,7 +171,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                                     </div>
                                 </div>
                                 <div className='time'>
-                                    <h4>4:30</h4>
+                                    <h4>{song.duration}</h4>
                                 </div>
                             </div>
                         ))

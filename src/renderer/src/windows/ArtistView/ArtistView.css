@@ -75,6 +75,7 @@
   transition: 0.3s;
   height: 50px;
   align-items: center;
+  color: var(--txt-color);
 }
 .artist-window .songs-info:hover {
   background-color: var(--song-list-bg);
@@ -102,7 +103,6 @@
 .artist-window .songs-info h1 {
   font-size: 1em;
   margin-left: 10px;
-  color: var(--txt-color);
   font-weight: 300;
   text-wrap: nowrap;
   overflow: hidden;
@@ -121,7 +121,7 @@
   background-color: var(--img-brightness-color);
 }
 .artist-window .highlight {
-  background-color: var(--sidebar-bg-color) !important;
+  background-color: var(--now-playing) !important;
   color: var(--song-now-playing-color);
   border: 1px solid var(--txt-color);
 }

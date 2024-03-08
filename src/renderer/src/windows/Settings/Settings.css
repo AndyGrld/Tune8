@@ -3,9 +3,9 @@
   z-index: 5;
   height: 90px;
   width: calc(100% - 200px);
+  left: 200px;
   padding: 0 10px;
   top: 0;
-  left: 200px;
   background-color: var(--bg-color);
   color: var(--txt-color);
   display: flex;

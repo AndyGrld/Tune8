@@ -28,23 +28,26 @@ function writeTime(time){
 async function createFoldersIfNotExist() {
     const foldersToCreate = [songsSavedData, queueSavedData, lyricsSavedData];
     for (const folder of foldersToCreate) {
-        try {
-            await fs.mkdir(folder, { recursive: true });
-            console.log(`Folder created: ${folder}`);
-        } catch (error) {
-            console.error(`Error creating folder ${folder}:`, error);
+        if(!fs.existsSync(folder)){
+            try {
+                await fs.mkdir(folder, { recursive: true });
+                console.log(`Folder created: ${folder}`);
+            } catch (error) {
+                console.error(`Error creating folder ${folder}:`, error);
+            }
         }
     }
 }
 
 function createDirectoryIfNotExists(directoryPath) {
     // Send request to create directory to main process
-    const success = ipcRenderer.sendSync('create-directory', directoryPath);
-    if (success) {
-        console.log(`Directory created: ${directoryPath}`);
-    } else {
-        console.error(`Error creating directory: ${directoryPath}`);
-    }
+    // todo: only create folder if folder does not exist
+        const success = ipcRenderer.sendSync('create-directory', directoryPath);
+        if (success) {
+            console.log(`Directory created: ${directoryPath}`);
+        } else {
+            console.error(`Error creating directory: ${directoryPath}`);
+        }
 }
 
 async function deleteFilesInFolder(folderPath) {

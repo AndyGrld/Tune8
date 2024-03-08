@@ -76,6 +76,7 @@
         transition: .3s;
         height: 50px;
         align-items: center;
+        color: var(--txt-color);
         &:hover{
             background-color: var(--song-list-bg);
         }
@@ -104,7 +105,6 @@
             font-size: 1em;
             margin-left: 10px;
             // width: 20%;
-            color: var(--txt-color);
             font-weight: 300;
             text-wrap: nowrap;
             overflow: hidden;
@@ -124,7 +124,7 @@
         }
     }
     .highlight{
-        background-color: var(--sidebar-bg-color) !important;
+        background-color: var(--now-playing) !important;
         color: var(--song-now-playing-color);
         border: 1px solid var(--txt-color);
         .album_cover{

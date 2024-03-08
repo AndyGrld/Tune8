@@ -47,14 +47,14 @@
         padding-top: 90px;
         margin-bottom: 20px;
         li{
-            // display: grid;
-            // grid-template-columns: 50px 120px 100px 100px auto;
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr 1fr auto;
             border-radius: 5px;
             height: 40px;
             padding: 5px;
             width: 100%;
             margin: 5px 0;
-            display: flex;
+            // display: flex;
             align-items: center;
             column-gap: 10px;
             transition: .3s;
@@ -66,21 +66,25 @@
                 position: relative;
                 font-size: .9em;
                 font-weight: 400;
-                overflow: hidden;
                 height: 25px;
+                line-clamp: 2;
+                text-wrap: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
-            .cell2{
-                width: 35%;
-            }
-            .cell3{
-                width: 25%;
-            }
-            .cell4{
-                width: 25%;
-            }
-            .cell5{
-                width: 5%;
-            }
+            // .cell2{
+            //     width: 35%;
+            // }
+            // .cell3{
+            //     width: 25%;
+            // }
+            // .cell4{
+            //     width: 25%;
+            // }
+            // .cell5{
+            //     padding-right: 5px;
+            //     width: min-content;
+            // }
             .img_div{
                 position: relative;
                 $size: 30px;
@@ -118,7 +122,7 @@
             }
         }
         .highlight{
-            background-color: var(--sidebar-bg-color) !important;
+            background-color: var(--now-playing) !important;
             color: var(--song-now-playing-color);
             border: 1px solid var(--txt-color);
             .img_div{
@@ -135,7 +139,7 @@
 }
 
 @media screen and (max-width: 768px) {
-    .songs_window ul li{
+    .queue_window ul li{
         .cell5{
             display: none;
         }
