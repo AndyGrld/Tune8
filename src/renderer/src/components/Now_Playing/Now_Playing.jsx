@@ -21,6 +21,10 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
         setViewLyrics(true)
     }
 
+    async function FavoritesToggle(songToToggle){
+        await window.electron.FavoritesToggle(songToToggle)
+    }
+
     useEffect(() => {
         const fetchLyrics = async () => {
             const newLyrics = await window.electron.getLyrics(currentSong);
@@ -103,21 +107,21 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                         <audio src={currentSong.url} ref={audioElem}></audio>
                         <div className="time-icons">
                             <div className='sides'>
-                                <FaShuffle size={20} style={{cursor: "pointer"}} onClick={ShuffleAndPlay}/>
-                                <HiMiniWindow size={22} style={{cursor: "pointer"}}/>
+                                <FaShuffle id='time-icon' size={20} style={{cursor: "pointer"}} onClick={ShuffleAndPlay}/>
+                                <HiMiniWindow id='time-icon' size={22} style={{cursor: "pointer"}}/>
                             </div>
                             <div className='bpf'>
-                                <FaBackward size={20} style={{cursor: "pointer"}} onClick={prevSong}/>
+                                <FaBackward id='time-icon' size={20} style={{cursor: "pointer"}} onClick={prevSong}/>
                                 {
                                     isPlaying
                                         ? <FaCirclePause id="plause" onClick={() => PlayPause(currentSong, [], false)} style={{cursor: "pointer"}}/>
                                         : <FaCirclePlay id="plause" onClick={() => PlayPause(currentSong, [], false)} style={{cursor: "pointer"}}/>
                                 }
-                                <FaForward size={20} style={{cursor: "pointer"}} onClick={nextSong}/>
+                                <FaForward id='time-icon' size={20} style={{cursor: "pointer"}} onClick={nextSong}/>
                             </div>
                             <div className='sides'>
-                                <MdFavoriteBorder size={25} style={{cursor: "pointer"}}/>
-                                <FaRotate size={20} style={{cursor: "pointer"}}/>
+                                <MdFavoriteBorder id='time-icon' size={25} style={{cursor: "pointer"}} onClick={() => FavoritesToggle(currentSong)}/>
+                                <FaRotate id='time-icon' size={20} style={{cursor: "pointer"}}/>
                             </div>
                         </div>
                     </div>

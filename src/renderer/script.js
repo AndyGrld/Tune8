@@ -29,6 +29,7 @@ function hideLyrics(){
     playBar.style.right = "0"
     playBar.style.boxShadow = "-5px 0 10px rgba(0,0,0,0.2)"
     lyrics_container.style.display = "none"
+    console.log("hide lyrics")
     lyricsShow = false
 }
 function showLyrics(){

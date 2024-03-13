@@ -56,15 +56,7 @@
   --now-playing: var(--album-card);
   --img-brightness-color: rgba(255, 255, 255, 0.3);
 }
-.main {
-  display: grid;
-  grid-template-columns: 200px auto;
-  background-color: var(--bg-color);
-  min-height: 100vh;
-}
-.main .right {
-  padding: 0 10px;
-  padding-bottom: 20px;
+body{
 }
 body::-webkit-scrollbar-thumb {
   background-color: grey;
@@ -75,12 +67,22 @@ body::-webkit-scrollbar-thumb:hover {
   cursor: pointer;
 }
 body::-webkit-scrollbar {
-  width: 12px;
+  width: 8px;
   display: block;
 }
 body::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px grey; 
+  background-color: white;
   border-radius: 10px;
+}
+.main {
+  display: grid;
+  grid-template-columns: 200px auto;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+}
+.main .right {
+  padding: 0 10px;
+  padding-bottom: 20px;
 }
 .main .indexing{
   position: fixed;

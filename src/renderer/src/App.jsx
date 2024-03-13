@@ -59,15 +59,15 @@ const App = () => {
 
   // plays next song if current song has ended
   useEffect(() => {
-    const audio = audioElem.current;
+    const audio = audioElem.current
     const handleEnded = () => {
-      nextSong();
-    };
-    audio.addEventListener('ended', handleEnded);
+      nextSong()
+    }
+    audio.addEventListener('ended', handleEnded)
     return () => {
-      audio.removeEventListener('ended', handleEnded);
-    };
-  }, [currentSong]);
+      audio.removeEventListener('ended', handleEnded)
+    }
+  }, [currentSong])
 
   // function to fetch all songs
   async function fetchItems(clearAll = false) {
@@ -81,7 +81,6 @@ const App = () => {
           const prevQueue = await window.electron.readQueue()
           if(prevQueue){
             if(prevQueue.length > 0){
-              console.log("prevQueue: ", prevQueue)
               setQueueSongs(prevQueue)
             }
           }
@@ -118,7 +117,6 @@ const App = () => {
         setCurrentSong(queueSongs[currentIndex + 1]);
       }
     }
-    console.log("current song: ", currentIndex)
     setTimeout(()=>{
       audioElem.current.play()
       setIsPlaying(true)
@@ -133,7 +131,6 @@ const App = () => {
       }else{
         setTimeout(async () => {
           setQueueSongs(queue)
-          console.log("New Queue: ", queue);
           try {
             const saved = await window.electron.saveQueue(queueSongs);
             if (saved) {
@@ -147,12 +144,10 @@ const App = () => {
         }, 1)
       }
     }else if(queueSongs.length === 0){
-      console.log("Queue set to all Songs since queue is empty")
       setQueueSongs(allSongs)
     }
   
       if (currentSong === song) {
-        console.log("play or pause song");
         setTimeout(() => {
           if (isPlaying) {
             audioElem.current.pause();
@@ -163,7 +158,6 @@ const App = () => {
           }
         }, 1);
       } else {
-        console.log("playing a new song: ", song.url);
         setCurrentSong(song);
         setTimeout(() => {
           audioElem.current.play();

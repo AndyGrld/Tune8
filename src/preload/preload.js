@@ -1,15 +1,11 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const fs = require('fs').promises;
 const path = require('path');
-// const jsmediatags = require('jsmediatags')
 const mm = require("music-metadata")
 const { promisify } = require('util')
 const { resolve } = require('path')
 const readdir = promisify(fs.readdir)
 const stat = promisify(fs.stat)
-// require('dotnet').config()
-
-const apiKey = process.env.CLIENT_SECRET
 
 const musicLocation = localStorage.getItem("MusicPath")
 const music_folder = musicLocation ? localStorage.getItem("MusicPath") : "";

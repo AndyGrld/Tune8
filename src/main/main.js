@@ -1,9 +1,8 @@
 import {app, BrowserWindow, ipcMain, dialog, protocol} from 'electron'
 import * as path from 'path'
-const contextMenu = require('electron-context-menu')
+import isDev from 'electron-is-dev'
 import fs from 'fs'
-
-let win;
+let win
 
 async function handleDirectoryOpen() {
     try {
@@ -46,7 +45,10 @@ function createWindow(){
         }
     })
 
-    win.loadURL("http://localhost:5173")
+    win.loadURL(
+        isDev 
+        ?"http://localhost:5173"
+        : `file://${path.join(__dirname, '../build/index.html')}`)
     // win.loadFile(path.join(__dirname, '../renderer/index.html'))
     win.on('closed', () => win = null)
     win.once('ready-to-show', () => win.show())
@@ -54,28 +56,27 @@ function createWindow(){
 
 app.on('ready', () => {
     protocol.interceptFileProtocol('file', (request, callback) => {
-        const url = request.url.substr(7); // Strip 'file://' from the beginning
+        const url = request.url.substr(7);
         callback({ path: url });
     });
 
     ipcMain.handle('dialog:openDirectory', handleDirectoryOpen);
-    contextMenu({
-        window: win,
-        prepend: (defaultActions, params, browserWindow) => [
-            // Custom context menu items to prepend
-            { label: 'Custom Action 1', click: () => console.log('Custom Action 1 clicked') },
-            { label: 'Custom Action 2', click: () => console.log('Custom Action 2 clicked') },
-            { type: 'separator' }, // Add a separator between custom and default actions
-            ...defaultActions, // Include default actions (e.g., 'Copy', 'Paste')
-        ],
-        append: (defaultActions, params, browserWindow) => [
-            // Custom context menu items to append
-            { label: 'Custom Action 3', click: () => console.log('Custom Action 3 clicked') },
-            { type: 'separator' }, // Add a separator between custom and default actions
-            ...defaultActions, // Include default actions (e.g., 'Copy', 'Paste')
-        ],
-        // Other options as needed
-    });
+    // contextMenu({
+    //     window: win,
+    //     prepend: (defaultActions, params, browserWindow) => [
+    //         // Custom context menu items to prepend
+    //         { label: 'Custom Action 1', click: () => console.log('Custom Action 1 clicked') },
+    //         { label: 'Custom Action 2', click: () => console.log('Custom Action 2 clicked') },
+    //         { type: 'separator' }, // Add a separator between custom and default actions
+    //         ...defaultActions, // Include default actions (e.g., 'Copy', 'Paste')
+    //     ],
+    //     append: (defaultActions, params, browserWindow) => [
+    //         // Custom context menu items to append
+    //         { label: 'Custom Action 3', click: () => console.log('Custom Action 3 clicked') },
+    //         { type: 'separator' }, // Add a separator between custom and default actions
+    //         ...defaultActions, // Include default actions (e.g., 'Copy', 'Paste')
+    //     ],
+    // });
 
     createWindow();
 });
