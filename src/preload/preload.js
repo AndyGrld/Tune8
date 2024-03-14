@@ -3,7 +3,8 @@ const fs = require('fs').promises;
 const path = require('path');
 const mm = require("music-metadata")
 const { promisify } = require('util')
-const { resolve } = require('path')
+const { resolve } = require('path');
+const { title } = require('process');
 const readdir = promisify(fs.readdir)
 const stat = promisify(fs.stat)
 
@@ -66,6 +67,15 @@ async function getFiles(dir) {
         return (await stat(res)).isDirectory() ? getFiles(res) : res;
     }));
     return files.reduce((a, f) => a.concat(f), []);
+}
+async function insertAllMusicDataIntoDatabase(dataArray) {
+    try {
+        await ipcRenderer.invoke('insert-songs-into-database', dataArray);
+        return true;
+    } catch (error) {
+        console.error(`Error inserting into database: ${error}`);
+        return false;
+    }
 }
 
 async function saveDataToFile(data, savePath, FileName = "musicData_") {
@@ -133,6 +143,29 @@ const convertImagesToBase64 = async () => {
 };
 
 contextBridge.exposeInMainWorld('electron', {
+    fetchDataFromDatabase: async () => {
+        try {
+            const data = await ipcRenderer.invoke('fetch-database-data');
+            return data;
+        } catch (error) {
+            console.error('Error fetching data from database:', error);
+            throw error;
+        }
+    },
+    favoritesToggle: async (song) => {
+        try{
+            const result = await ipcRenderer.invoke('toggle-favorite', song)
+            if(result === -1){
+                console.error('Failed to make changes')
+                throw "Failed to make changes to database"
+            }else{
+                return result
+            }
+        }catch(error){
+            console.error('Error updating database: ', error)
+            throw error
+        }
+    },
     createFolders: () => {
         createFoldersIfNotExist()
     },
@@ -207,9 +240,10 @@ contextBridge.exposeInMainWorld('electron', {
             if(clearAll){
                 await deleteFilesInFolder(songsSavedData);
             }
-            const musicData = await readFromFile(songsSavedData);
-            if (musicData.length > 0) {
-                return musicData;
+            const musicData = new Set(await ipcRenderer.invoke('fetch-database-data'));
+            if (musicData.size > 0) {
+                console.log("music Data: ", musicData)
+                return Array.from(musicData)
             }
             const imagesBase64 = await convertImagesToBase64();
             const songsPath = await getFiles(music_folder);
@@ -222,25 +256,30 @@ contextBridge.exposeInMainWorld('electron', {
                 const imageSrc = metadata.common.picture && metadata.common.picture.length > 0
                     ? `data:${metadata.common.picture[0].format};base64,${metadata.common.picture[0].data.toString('base64')}`
                     : imagesBase64[index % imagesBase64.length];
-                musicData.push({
-                    url: `/songs/${path.basename(filePath)}`,
-                    tag: {tags: {
-                        title: metadata.common.title ? metadata.common.title : path.basename(filePath).split('.mp3')[0],
-                        artist: metadata.common.artist ? metadata.common.artist : `Unknown Artist`,
-                        album: metadata.common.album ? metadata.common.album : `Unknown Album`,
-                        year: metadata.common.year ? metadata.common.year : `#`,
-                        genre: metadata.common.genre ? metadata.common.genre : `#`,
-                    }},
+                const songTitle = metadata.common.title ? metadata.common.title : path.basename(filePath).split('.mp3')[0];
+                const songAlbum = metadata.common.album ? metadata.common.album : `Unknown Album`
+                const songYear = metadata.common.year ? metadata.common.year : `#`
+                const musicDataObject = {
+                    url: `/songs/${encodeURIComponent(path.basename(filePath))}`,
+                    tag: {
+                        tags: {
+                            title: songTitle,
+                            artist: metadata.common.artist ? metadata.common.artist : `Unknown Artist`,
+                            album: songAlbum,
+                            year: songYear,
+                            genre: metadata.common.genre ? metadata.common.genre[0] : `#`,
+                        }
+                    },
                     imageSrc,
-                    duration: `${writeTime(Math.floor(duration / 60))}:${writeTime(Math.floor(duration % 60))}`
-                });
-                index+=1
+                    duration: duration ? `${writeTime(Math.floor(duration / 60))}:${writeTime(Math.floor(duration % 60))}` : "1:00",
+                    location: "songs"
+                };
+                musicData.add(musicDataObject);
+                index += 1
                 console.log(index)
             }
-    
-            // console.log(musicData);
-            await saveDataToFile(musicData, songsSavedData);
-            return musicData;
+            await insertAllMusicDataIntoDatabase(Array.from(musicData));
+            return Array.from(musicData);
         } catch (error) {
             console.error('Error reading directory:', error);
             return [];

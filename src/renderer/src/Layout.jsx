@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import { Outlet } from "react-router-dom";
 
 import Sidebar from './components/Sidebar/Sidebar'
@@ -7,6 +7,7 @@ import Now_Playing from './components/Now_Playing/Now_Playing'
 const Layout = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
     musicProgress, setMusicProgress, currentSong, theme, queueSongs,
     currentIndex, favoriteSongs, setFavoriteSongs, allSongs}) => {
+
     return (
         <main className={`main ${theme}`}>
             {

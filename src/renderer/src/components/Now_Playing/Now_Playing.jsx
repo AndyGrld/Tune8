@@ -3,7 +3,7 @@ import './Now_Playing.css'
 import {FaRotate, FaCirclePause, FaCirclePlay, FaShuffle, FaForward, FaBackward, FaXmark, FaAngleLeft, FaAngleRight} from 'react-icons/fa6'
 import {ImEnlarge} from 'react-icons/im'
 import {HiMiniWindow} from 'react-icons/hi2'
-import {MdOutlineFavorite, MdFavoriteBorder} from 'react-icons/md'
+import {MdOutlineFavorite, MdFavoriteBorder, MdFavorite} from 'react-icons/md'
 
 const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
     musicProgress, setMusicProgress, currentSong, queueSongs, currentIndex,
@@ -22,7 +22,12 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
     }
 
     async function FavoritesToggle(songToToggle){
-        await window.electron.FavoritesToggle(songToToggle)
+        try {
+            const updatedIsFavorite = await window.electron.favoritesToggle(songToToggle);
+            setCurrentSong({ ...currentSong, isFavorite: updatedIsFavorite });
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+        }
     }
 
     useEffect(() => {
@@ -114,13 +119,17 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                                 <FaBackward id='time-icon' size={20} style={{cursor: "pointer"}} onClick={prevSong}/>
                                 {
                                     isPlaying
-                                        ? <FaCirclePause id="plause" onClick={() => PlayPause(currentSong, [], false)} style={{cursor: "pointer"}}/>
-                                        : <FaCirclePlay id="plause" onClick={() => PlayPause(currentSong, [], false)} style={{cursor: "pointer"}}/>
+                                        ? <FaCirclePause id="plause" style={{cursor: "pointer"}} onClick={() => PlayPause(currentSong, [], false)}/>
+                                        : <FaCirclePlay id="plause" style={{cursor: "pointer"}}  onClick={() => PlayPause(currentSong, [], false)}/>
                                 }
                                 <FaForward id='time-icon' size={20} style={{cursor: "pointer"}} onClick={nextSong}/>
                             </div>
                             <div className='sides'>
-                                <MdFavoriteBorder id='time-icon' size={25} style={{cursor: "pointer"}} onClick={() => FavoritesToggle(currentSong)}/>
+                                {
+                                    currentSong.isFavorite
+                                    ?<MdFavorite id='time-icon' size={25} style={{cursor: "pointer"}} onClick={() => FavoritesToggle(currentSong)}/>
+                                    :<MdFavoriteBorder id='time-icon' size={25} style={{cursor: "pointer"}} onClick={() => FavoritesToggle(currentSong)}/>
+                                }
                                 <FaRotate id='time-icon' size={20} style={{cursor: "pointer"}}/>
                             </div>
                         </div>
