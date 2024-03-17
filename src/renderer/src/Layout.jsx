@@ -6,7 +6,8 @@ import Now_Playing from './components/Now_Playing/Now_Playing'
 
 const Layout = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
     musicProgress, setMusicProgress, currentSong, theme, queueSongs,
-    currentIndex, favoriteSongs, setFavoriteSongs, allSongs}) => {
+    currentIndex, favoriteSongs, setFavoriteSongs, allSongs,
+    setAllSongs, setCurrentSong}) => {
 
     return (
         <main className={`main ${theme}`}>
@@ -24,9 +25,10 @@ const Layout = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                 <Now_Playing isPlaying={isPlaying} PlayPause={PlayPause}
                     audioElem={audioElem} musicProgress={musicProgress}
                     setMusicProgress={setMusicProgress} currentSong={currentSong}
-                    nextSong={nextSong} prevSong={prevSong}
+                    nextSong={nextSong} prevSong={prevSong} allSongs={allSongs}
                     queueSongs={queueSongs} currentIndex={currentIndex}
-                    favoriteSongs={favoriteSongs} setFavoriteSongs={setFavoriteSongs}/>
+                    favoriteSongs={favoriteSongs} setFavoriteSongs={setFavoriteSongs}
+                    setAllSongs={setAllSongs} setCurrentSong={setCurrentSong}/>
             </div>
         </main>
     )

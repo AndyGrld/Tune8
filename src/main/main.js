@@ -69,7 +69,7 @@ ipcMain.handle('insert-songs-into-database', async (event, dataArray) => {
         console.error(`Error inserting into database: ${error}`);
         return false;
     }
-});
+})
 
 async function insertAllMusicDataIntoDatabase(dataArray) {
     return new Promise((resolve, reject) => {
@@ -91,8 +91,8 @@ async function insertAllMusicDataIntoDatabase(dataArray) {
             } else {
                 resolve(this.lastID);
             }
-        });
-    });
+        })
+    })
 }
 
 ipcMain.handle('fetch-single-song', async (event, { data }) => {
@@ -103,7 +103,7 @@ ipcMain.handle('fetch-single-song', async (event, { data }) => {
         console.error('Error fetching single song from database:', error);
         return null;
     }
-});
+})
 async function getSingleSong(data){
     return new Promise((resolve, reject) => {
         const query = 'SELECT * FROM songs WHERE title = ? AND artist = ? AND album = ? LIMIT 1';
@@ -113,22 +113,13 @@ async function getSingleSong(data){
             } else {
                 resolve(row);
             }
-        });
+        })
     })
 }
-ipcMain.handle('toggle-favorite', async (event, data) => {
-    try{
-        await toggleFavorites(data)
-        return data.isFavorite ? 0 : 1
-    }catch (error){
-        console.error('Error updating database: ', error)
-        return -1
-    }
-})
 async function toggleFavorites(data) {
     return new Promise((resolve, reject) => {
-        const toggleTo = data.isFavorite ? 0 : 1;
-        db.run('UPDATE songs SET isFavorite = ? WHERE id = ?', [toggleTo, data.id], function(err) {
+        const toggleTo = data.newValue === 0 ? 0 : 1;
+        db.run('UPDATE songs SET isFavorite = ? WHERE id = ?', [toggleTo, data.songToToggle.id], function(err) {
             if (err) {
                 reject(err);
             } else {
@@ -136,6 +127,35 @@ async function toggleFavorites(data) {
             }
         });
     });
+}
+ipcMain.handle('toggle-favorite', async (event, data) => {
+    try{
+        await toggleFavorites(data)
+        return data.newValue === 0 ? 0 : 1
+    }catch (error){
+        console.error('Error updating database: ', error)
+        return -1
+    }
+})
+ipcMain.handle('update-last-played', async (event, data) => {
+    try {
+        await updateLastPlayed(data)
+        return true
+    } catch (error) {
+        return false
+    }
+});
+async function updateLastPlayed(data) {
+    return new Promise((resolve, reject) => {
+        const timestamp = new Date().toISOString();
+        db.run('UPDATE songs SET lastPlayed = ? WHERE id = ?', [timestamp, data.id], function (err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve("Updated successfully")
+            }
+        })
+    })
 }
 ipcMain.handle('update-database', async (event, data) => {
     try {
@@ -158,6 +178,20 @@ async function updateDatabase(data) {
         });
     });
 }
+const handleToggleAlwaysOnTop = () => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) {
+        const newIsAlwaysOnTop = !win.isAlwaysOnTop();
+        win.setAlwaysOnTop(newIsAlwaysOnTop, 'floating');
+        win.setSize(newIsAlwaysOnTop ? 300 : 1200, newIsAlwaysOnTop ? 250 : 800);
+        win.setResizable(newIsAlwaysOnTop ? false : true)
+        win.frame = !newIsAlwaysOnTop
+        // win.setPosition(win.getPosition()[0] + (newIsAlwaysOnTop ? 900 : -900), win.getPosition()[1]);
+    }
+};
+ipcMain.on('toggle-always-on-top', (event, args) => {
+    handleToggleAlwaysOnTop();
+});
 ipcMain.on('create-directory', (event, directoryPath) => {
     try {
         fs.mkdirSync(directoryPath, { recursive: true });

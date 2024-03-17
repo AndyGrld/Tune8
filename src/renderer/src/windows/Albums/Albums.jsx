@@ -60,7 +60,11 @@ const Albums = ({allSongs}) => {
                                                 <Link key={album} to={`/album/${album}`}>
                                                     <div className="div">
                                                         <div>
-                                                            <img src={albumData.imageSrc}/>
+                                                            <img src={albumData.imageSrc}
+                                                            onError={(e) => { 
+                                                                e.target.onerror = null; 
+                                                                e.target.src = '/my_images/placeholders/music/1.jpg' 
+                                                            }} />
                                                         </div>
                                                         <h3>{album}</h3>
                                                         <p>{sliceText(albumData.tag.tags.artist, 15)}</p>

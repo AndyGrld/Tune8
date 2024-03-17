@@ -41,12 +41,14 @@ const App = () => {
 
   // fetch all songs on app startup
   useEffect(() => {
-    // const currentTheme = localStorage.getItem("theme")
-    // if(currentTheme){
-    //   setTheme(currentTheme)
-    // }
     fetchItems()
   }, [])
+
+  // setup favorites
+  useEffect(() => {
+    const favorites = allSongs.filter(song => song.isFavorite === 1)
+    setFavoriteSongs(favorites)
+  }, [allSongs])
 
   // change music progress in now playing
   useEffect(() => {
@@ -68,6 +70,18 @@ const App = () => {
       audio.removeEventListener('ended', handleEnded)
     }
   }, [currentSong])
+
+  // update last played on current song change
+  useEffect(() => {
+    const saveLastPlayedAsync = async () => {
+        try {
+            await window.electron.saveLastPlayed(currentSong)
+        } catch (error) {
+            console.error("Error saving last played:", error)
+        }
+    }
+    saveLastPlayedAsync()
+}, [currentSong])
 
   // function to fetch all songs
   async function fetchItems(clearAll = false) {
@@ -172,8 +186,9 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Layout allSongs={allSongs} isPlaying={isPlaying} PlayPause={PlayPause} currentSong={currentSong}
         audioElem={audioElem} musicProgress={musicProgress} setMusicProgress={setMusicProgress}
-        nextSong={nextSong} prevSong={prevSong} theme={theme} queueSongs={queueSongs}
-        currentIndex={currentIndex} favoriteSongs={favoriteSongs} setFavoriteSongs={setFavoriteSongs}/>}>
+        nextSong={nextSong} prevSong={prevSong} theme={theme} queueSongs={queueSongs} setAllSongs={setAllSongs}
+        currentIndex={currentIndex} favoriteSongs={favoriteSongs} setFavoriteSongs={setFavoriteSongs}
+        setCurrentSong={setCurrentSong}/>}>
           <Route index element={<Home/>}></Route>
           <Route path='albums' element={<Albums allSongs={allSongs}/>}></Route>
           <Route path='songs' element={<Songs allSongs={allSongs} isPlaying={isPlaying}

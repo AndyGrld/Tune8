@@ -6,10 +6,16 @@ import {HiMiniWindow} from 'react-icons/hi2'
 import {MdOutlineFavorite, MdFavoriteBorder, MdFavorite} from 'react-icons/md'
 
 const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
-    musicProgress, setMusicProgress, currentSong, queueSongs, currentIndex,
-    favoriteSongs, setFavoriteSongs}) => {
+    musicProgress, setMusicProgress, currentSong, setCurrentSong, queueSongs, currentIndex,
+    favoriteSongs, setFavoriteSongs, setAllSongs, allSongs}) => {
     const [viewLyrics, setViewLyrics] = useState(false)
     const [songLyrics, setSongLyrics] = useState("some lyrics")
+    const [isFavorite, setIsFavorite] = useState(false)
+    const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
+
+    const handleToggleAlwaysOnTop = () => {
+        window.electron.makeMini();
+    }
 
     function ShuffleAndPlay(){
         const newQueue = shuffleArray(queueSongs)
@@ -23,20 +29,47 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
 
     async function FavoritesToggle(songToToggle){
         try {
-            const updatedIsFavorite = await window.electron.favoritesToggle(songToToggle);
-            setCurrentSong({ ...currentSong, isFavorite: updatedIsFavorite });
+            // updatedisfavorite => 1 if set to favorite
+            //                      0 if removed from favorite
+            //                      -1 if failed to update
+            const updatedIsFavorite = await window.electron.favoritesToggle({songToToggle: songToToggle, newValue: currentSong.isFavorite ? 0 : 1})
+            if(updatedIsFavorite == -1){
+                console.error("Failed to update song")
+            }
+            const value = !!updatedIsFavorite
+            if(songToToggle === currentSong){
+                setIsFavorite(value)
+            }
+            if(value){
+                setFavoriteSongs([...favoriteSongs, songToToggle]);
+            }else{
+                console.log("previous favorites: ", favoriteSongs)
+                const prevFavorites = favoriteSongs.filter(favSong => favSong.id !== songToToggle.id);
+                console.log("current favorites: ", prevFavorites)
+                setFavoriteSongs(prevFavorites);
+            }
+            const updatedCurrentSong = { ...currentSong, isFavorite: value };
+            setCurrentSong(updatedCurrentSong);
         } catch (error) {
-            console.error('Error toggling favorite:', error);
+            console.error('Error toggling favorite:', error)
         }
     }
 
+    const handleContextMenu = (e, song) => {
+        e.preventDefault()
+        console.log('Right-clicked on song:', song);
+    };
+
     useEffect(() => {
+        setSongLyrics("Searching")
         const fetchLyrics = async () => {
             const newLyrics = await window.electron.getLyrics(currentSong);
             setSongLyrics(newLyrics);
-            console.log("new lyrics: ", newLyrics);
         };
         fetchLyrics();
+        if(currentSong){
+            setIsFavorite(currentSong.isFavorite)
+        }
     }, [currentSong]);
 
     function HideNowPlaying(){
@@ -113,7 +146,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                         <div className="time-icons">
                             <div className='sides'>
                                 <FaShuffle id='time-icon' size={20} style={{cursor: "pointer"}} onClick={ShuffleAndPlay}/>
-                                <HiMiniWindow id='time-icon' size={22} style={{cursor: "pointer"}}/>
+                                <HiMiniWindow id='time-icon' size={22} style={{cursor: "pointer"}} onClick={handleToggleAlwaysOnTop}/>
                             </div>
                             <div className='bpf'>
                                 <FaBackward id='time-icon' size={20} style={{cursor: "pointer"}} onClick={prevSong}/>
@@ -126,7 +159,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                             </div>
                             <div className='sides'>
                                 {
-                                    currentSong.isFavorite
+                                    currentSong.isFavorite||isFavorite
                                     ?<MdFavorite id='time-icon' size={25} style={{cursor: "pointer"}} onClick={() => FavoritesToggle(currentSong)}/>
                                     :<MdFavoriteBorder id='time-icon' size={25} style={{cursor: "pointer"}} onClick={() => FavoritesToggle(currentSong)}/>
                                 }
@@ -146,7 +179,8 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                     {
                         currentIndex === -1 
                         ? queueSongs.slice(0, 5).map(song => (
-                            <div  className={song === currentSong ? 'highlight queue-cell' : "queue-cell"} key={song.tag.tags.title} onClick={() => PlayPause(song, [], false)}>
+                            <div  className={song === currentSong ? 'highlight queue-cell' : "queue-cell"} key={song.tag.tags.title}
+                            onClick={() => PlayPause(song, [], false)} onContextMenu={(e) => handleContextMenu(e, song)}>
                                 <div className='image_name'>
                                     <img src={song.imageSrc}/>
                                     <div>
@@ -214,6 +248,61 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
             </div>
         }
     </div>
+    {
+        currentSong && 
+        <div className="mini-player">
+            <div className='mini-back' style={{backgroundImage: `url(${currentSong.imageSrc})`}}></div>
+            <div className="mini-window">
+                <div className="tools">
+                    <div className="song-title">
+                        <h3 style={{textAlign: "center"}}>
+                            {currentSong.tag.tags.title}
+                        </h3>
+                    </div>
+                    {/* <div className='artist_album'>
+                        <h3 className='s_title'>{currentSong.tag.tags.artist}</h3>
+                        <h3 className='s_album'>{currentSong.tag.tags.album}</h3>
+                    </div> */}
+                    <div className="time">
+                        <p id='start'>
+                            {`${writeTime(Math.floor(musicProgress / 60))}:${writeTime(Math.floor(musicProgress % 60))}`}
+                        </p>
+                        <div className="custom_progress" onClick={checkWidth} ref={clickRef}>
+                            <div className="progress_bar" style={{width: `${(musicProgress/audioElem.current.duration) * 100}%`}}>
+                                <div className="progress_thumb"></div>
+                            </div>
+                        </div>
+                        <p id='end'>
+                            {currentSong.duration}
+                        </p>
+                    </div>
+                    <div className="mini-time-icons">
+                        <div className='sides'>
+                            <FaShuffle id='mini-time-icon' size={20} style={{cursor: "pointer"}} onClick={ShuffleAndPlay}/>
+                            <HiMiniWindow id='mini-time-icon' size={22} style={{cursor: "pointer"}} onClick={handleToggleAlwaysOnTop}/>
+                        </div>
+                        <div className='bpf'>
+                            <FaBackward id='mini-time-icon' size={20} style={{cursor: "pointer"}} onClick={prevSong}/>
+                            {
+                                isPlaying
+                                ? <FaCirclePause id="plause" style={{cursor: "pointer"}} onClick={() => PlayPause(currentSong, [], false)}/>
+                                : <FaCirclePlay id="plause" style={{cursor: "pointer"}}  onClick={() => PlayPause(currentSong, [], false)}/>
+                            }
+                            <FaForward id='mini-time-icon' size={20} style={{cursor: "pointer"}} onClick={nextSong}/>
+                        </div>
+                        <div className='sides'>
+                            {
+                                currentSong.isFavorite||isFavorite
+                                ?<MdFavorite id='mini-time-icon' size={25} style={{cursor: "pointer"}} onClick={() => FavoritesToggle(currentSong)}/>
+                                :<MdFavoriteBorder id='mini-time-icon' size={25} style={{cursor: "pointer"}} onClick={() => FavoritesToggle(currentSong)}/>
+                            }
+                            <FaRotate id='mini-time-icon' size={20} style={{cursor: "pointer"}}/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
     </>
     )
 }

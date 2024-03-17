@@ -1,8 +1,11 @@
 let lyricsShow = false;
+let favorite = []
 
 function showNowPlaying(){
     const playBar = document.getElementsByClassName('now-playing')
     const overlay = document.getElementsByClassName('overlay')
+    const body = document.getElementsByTagName('body')[0]
+    body.style.overflow = 'hidden'
     playBar[0].style.right = "0"
     overlay[0].style.display = "block"
     overlay[0].style.opacity = "1"
@@ -11,6 +14,8 @@ function hideNowPlaying(){
     hideLyrics()
     const playBar = document.getElementsByClassName('now-playing')
     const overlay = document.getElementsByClassName('overlay')
+    const body = document.getElementsByTagName('body')[0]
+    body.style.overflow = 'scroll'
     playBar[0].style.right = "-500px"
     overlay[0].style.display = "none"
     overlay[0].style.opacity = "0"

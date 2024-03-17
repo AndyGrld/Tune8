@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react'
 import './Queue.css'
 import { BsPauseCircle, BsPlayCircle } from 'react-icons/bs'
 

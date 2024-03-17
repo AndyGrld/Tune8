@@ -118,12 +118,24 @@ const convertImagesToBase64 = async () => {
   }
 };
 contextBridge.exposeInMainWorld("electron", {
+  makeMini: () => {
+    ipcRenderer.send("toggle-always-on-top");
+  },
   fetchDataFromDatabase: async () => {
     try {
       const data = await ipcRenderer.invoke("fetch-database-data");
       return data;
     } catch (error) {
       console.error("Error fetching data from database:", error);
+      throw error;
+    }
+  },
+  saveLastPlayed: async (song) => {
+    try {
+      const result = await ipcRenderer.invoke("update-last-played", song);
+      return result;
+    } catch (error) {
+      console.error("Error updating song");
       throw error;
     }
   },
@@ -170,29 +182,33 @@ contextBridge.exposeInMainWorld("electron", {
       const lyricsFolderPath = path.join(lyricsSavedData, song.tag.tags.album);
       createDirectoryIfNotExists(lyricsFolderPath);
       const lyricsFilePath = path.join(lyricsFolderPath, lyricsFileName);
+      let lyricsFileContent = "";
       try {
-        const lyricsFileContent = await fs.readFile(lyricsFilePath, "utf8");
-        console.log("Lyrics found in file:", lyricsFileContent);
-        return lyricsFileContent;
+        lyricsFileContent = await fs.readFile(lyricsFilePath, "utf8");
       } catch (readError) {
-        console.log("Lyrics file not found, fetching from API:", readError);
       }
-      const response = await fetch(
-        `https://api.lyrics.ovh/v1/${song.tag.tags.artist}/${song.tag.tags.title}`
-      );
-      const data = await response.json();
-      if (data.lyrics !== void 0) {
-        const lyrics = data.lyrics;
-        await fs.writeFile(lyricsFilePath, lyrics, "utf8");
-        console.log("Lyrics saved to file:", lyricsFilePath);
-        return lyrics;
+      if (lyricsFileContent) {
+        return lyricsFileContent;
       } else {
-        console.log("Lyrics not found");
-        return "not found";
+        console.log(song.tag.tags.title.split("|")[0]);
+        const response = await fetch(
+          `https://api.lyrics.ovh/v1/${song.tag.tags.artist}/${song.tag.tags.title.split("|")[0]}`
+        );
+        const data = await response.json();
+        if (data.lyrics !== void 0) {
+          lyricsFileContent = data.lyrics;
+          if (!lyricsFileContent) {
+            lyricsFileContent = "Not found";
+          }
+          await fs.writeFile(lyricsFilePath, lyricsFileContent, "utf8");
+          return lyricsFileContent;
+        } else {
+          return "Not found";
+        }
       }
     } catch (error) {
       console.error("An error occurred:", error);
-      return null;
+      return "Not found";
     }
   },
   addMusicDirectory: async () => {

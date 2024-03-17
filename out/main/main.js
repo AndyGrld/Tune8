@@ -136,23 +136,43 @@ async function getSingleSong(data) {
     });
   });
 }
+async function toggleFavorites(data) {
+  return new Promise((resolve, reject) => {
+    const toggleTo = data.newValue === 0 ? 0 : 1;
+    db.run("UPDATE songs SET isFavorite = ? WHERE id = ?", [toggleTo, data.songToToggle.id], function(err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(toggleTo);
+      }
+    });
+  });
+}
 electron.ipcMain.handle("toggle-favorite", async (event, data) => {
   try {
     await toggleFavorites(data);
-    return data.isFavorite ? 0 : 1;
+    return data.newValue === 0 ? 0 : 1;
   } catch (error) {
     console.error("Error updating database: ", error);
     return -1;
   }
 });
-async function toggleFavorites(data) {
+electron.ipcMain.handle("update-last-played", async (event, data) => {
+  try {
+    await updateLastPlayed(data);
+    return true;
+  } catch (error) {
+    return false;
+  }
+});
+async function updateLastPlayed(data) {
   return new Promise((resolve, reject) => {
-    const toggleTo = data.isFavorite ? 0 : 1;
-    db.run("UPDATE songs SET isFavorite = ? WHERE id = ?", [toggleTo, data.id], function(err) {
+    const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+    db.run("UPDATE songs SET lastPlayed = ? WHERE id = ?", [timestamp, data.id], function(err) {
       if (err) {
         reject(err);
       } else {
-        resolve(toggleTo);
+        resolve("Updated successfully");
       }
     });
   });
@@ -177,6 +197,19 @@ async function updateDatabase(data) {
     });
   });
 }
+const handleToggleAlwaysOnTop = () => {
+  const win2 = electron.BrowserWindow.getFocusedWindow();
+  if (win2) {
+    const newIsAlwaysOnTop = !win2.isAlwaysOnTop();
+    win2.setAlwaysOnTop(newIsAlwaysOnTop, "floating");
+    win2.setSize(newIsAlwaysOnTop ? 300 : 1200, newIsAlwaysOnTop ? 250 : 800);
+    win2.setResizable(newIsAlwaysOnTop ? false : true);
+    win2.frame = !newIsAlwaysOnTop;
+  }
+};
+electron.ipcMain.on("toggle-always-on-top", (event, args) => {
+  handleToggleAlwaysOnTop();
+});
 electron.ipcMain.on("create-directory", (event, directoryPath) => {
   try {
     fs.mkdirSync(directoryPath, { recursive: true });
