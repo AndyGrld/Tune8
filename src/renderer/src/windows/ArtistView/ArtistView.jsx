@@ -14,7 +14,11 @@ const ArtistView = ({allSongs, PlayPause, currentSong, isPlaying}) => {
 
     const totalSongs = artistAlbumsMap.length
     const totalDurationInSeconds = artistAlbumsMap.reduce((total, song) => {
-        const [minutes, seconds] = song.duration.split(':').map(Number)
+        let [minutes, seconds] = song.duration.split(':').map(Number);
+        if(isNaN(minutes) || isNaN(seconds)){
+            minutes = 0
+            seconds = 0
+        }
         return total + (minutes * 60) + seconds;
     }, 0)
     

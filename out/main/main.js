@@ -28,7 +28,6 @@ const getFromEnv = Number.parseInt(env.ELECTRON_IS_DEV, 10) === 1;
 const isDev = isEnvSet ? getFromEnv : !electron.app.isPackaged;
 let win;
 const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database("./database.db");
 async function handleDirectoryOpen() {
   try {
     const result = await electron.dialog.showOpenDialog({ properties: ["openDirectory"] });
@@ -52,11 +51,19 @@ electron.ipcMain.handle("fetch-database-data", async (event) => {
 });
 async function fetchMusicdataFromDatabase() {
   try {
+    const db = new sqlite3.Database("./database.db");
     let rows = await new Promise((resolve, reject) => {
       db.all("SELECT * FROM songs", (err, rows2) => {
         if (err) {
           reject(err);
         } else {
+          db.close((err2) => {
+            if (err2) {
+              console.error("An error occured");
+            } else {
+              console.log("Database closed succefully");
+            }
+          });
           resolve(rows2);
         }
       });
@@ -106,10 +113,18 @@ async function insertAllMusicDataIntoDatabase(dataArray) {
       data.duration,
       data.url
     ]);
+    const db = new sqlite3.Database("./database.db");
     db.run(`INSERT INTO songs (title, artist, album, year, genre, imageSrc, duration, url) VALUES ${placeholders}`, values, function(err) {
       if (err) {
         reject(err);
       } else {
+        db.close((err2) => {
+          if (err2) {
+            console.error(err2.message);
+          } else {
+            console.log("Database connection closed.");
+          }
+        });
         resolve(this.lastID);
       }
     });
@@ -127,10 +142,18 @@ electron.ipcMain.handle("fetch-single-song", async (event, { data }) => {
 async function getSingleSong(data) {
   return new Promise((resolve, reject) => {
     const query = "SELECT * FROM songs WHERE title = ? AND artist = ? AND album = ? LIMIT 1";
+    const db = new sqlite3.Database("./database.db");
     db.get(query, [data.title, data.artist, data.album], (err, row) => {
       if (err) {
         reject(err);
       } else {
+        db.close((err2) => {
+          if (err2) {
+            console.error(err2.message);
+          } else {
+            console.log("Database connection closed.");
+          }
+        });
         resolve(row);
       }
     });
@@ -139,10 +162,18 @@ async function getSingleSong(data) {
 async function toggleFavorites(data) {
   return new Promise((resolve, reject) => {
     const toggleTo = data.newValue === 0 ? 0 : 1;
+    const db = new sqlite3.Database("./database.db");
     db.run("UPDATE songs SET isFavorite = ? WHERE id = ?", [toggleTo, data.songToToggle.id], function(err) {
       if (err) {
         reject(err);
       } else {
+        db.close((err2) => {
+          if (err2) {
+            console.error(err2.message);
+          } else {
+            console.log("Database connection closed.");
+          }
+        });
         resolve(toggleTo);
       }
     });
@@ -168,10 +199,18 @@ electron.ipcMain.handle("update-last-played", async (event, data) => {
 async function updateLastPlayed(data) {
   return new Promise((resolve, reject) => {
     const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+    const db = new sqlite3.Database("./database.db");
     db.run("UPDATE songs SET lastPlayed = ? WHERE id = ?", [timestamp, data.id], function(err) {
       if (err) {
         reject(err);
       } else {
+        db.close((err2) => {
+          if (err2) {
+            console.error(err2.message);
+          } else {
+            console.log("Database connection closed.");
+          }
+        });
         resolve("Updated successfully");
       }
     });
@@ -188,10 +227,18 @@ electron.ipcMain.handle("update-database", async (event, data) => {
 });
 async function updateDatabase(data) {
   return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database("./database.db");
     db.run("UPDATE songs SET title = ? WHERE id = ?", [data.title, data.id], function(err) {
       if (err) {
         reject(err);
       } else {
+        db.close((err2) => {
+          if (err2) {
+            console.error(err2.message);
+          } else {
+            console.log("Database connection closed.");
+          }
+        });
         resolve();
       }
     });
@@ -220,8 +267,9 @@ electron.ipcMain.on("create-directory", (event, directoryPath) => {
     event.returnValue = false;
   }
 });
-db.serialize(() => {
-  db.run(`
+const database = new sqlite3.Database("./database.db");
+database.serialize(() => {
+  database.run(`
         CREATE TABLE IF NOT EXISTS songs (
             id INTEGER PRIMARY KEY,
             title TEXT,

@@ -4,7 +4,6 @@ import isDev from 'electron-is-dev'
 import fs from 'fs'
 let win
 const sqlite3 = require('sqlite3').verbose()
-const db = new sqlite3.Database('./database.db')
 
 async function handleDirectoryOpen() {
     try {
@@ -29,15 +28,24 @@ ipcMain.handle('fetch-database-data', async (event) => {
 });
 async function fetchMusicdataFromDatabase() {
     try {
+        const db = new sqlite3.Database('./database.db')
         let rows = await new Promise((resolve, reject) => {
             db.all('SELECT * FROM songs', (err, rows) => {
                 if (err) {
                     reject(err);
                 } else {
+                    db.close((err) => {
+                        if(err){
+                            console.error('An error occured')
+                        }
+                        else{
+                            console.log('Database closed succefully')
+                        }
+                    })
                     resolve(rows);
                 }
-            });
-        });
+            })
+        })
         return rows.map(row => ({
             imageSrc: row.imageSrc,
             duration: row.duration,
@@ -55,7 +63,7 @@ async function fetchMusicdataFromDatabase() {
                     album: row.album
                 }
             }
-        }));
+        }))
     }catch (error) {
         console.error('Error fetching data from database:', error);
         throw error;
@@ -84,11 +92,19 @@ async function insertAllMusicDataIntoDatabase(dataArray) {
             data.duration,
             data.url
         ]);
-
+        
+        const db = new sqlite3.Database('./database.db')
         db.run(`INSERT INTO songs (title, artist, album, year, genre, imageSrc, duration, url) VALUES ${placeholders}`, values, function (err) {
             if (err) {
                 reject(err);
             } else {
+                db.close((err) => {
+                    if (err) {
+                        console.error(err.message);
+                    } else {
+                        console.log('Database connection closed.');
+                    }
+                })
                 resolve(this.lastID);
             }
         })
@@ -107,10 +123,18 @@ ipcMain.handle('fetch-single-song', async (event, { data }) => {
 async function getSingleSong(data){
     return new Promise((resolve, reject) => {
         const query = 'SELECT * FROM songs WHERE title = ? AND artist = ? AND album = ? LIMIT 1';
+        const db = new sqlite3.Database('./database.db')
         db.get(query, [data.title, data.artist, data.album], (err, row) => {
             if (err) {
                 reject(err);
             } else {
+                db.close((err) => {
+                    if (err) {
+                        console.error(err.message);
+                    } else {
+                        console.log('Database connection closed.');
+                    }
+                })
                 resolve(row);
             }
         })
@@ -119,14 +143,22 @@ async function getSingleSong(data){
 async function toggleFavorites(data) {
     return new Promise((resolve, reject) => {
         const toggleTo = data.newValue === 0 ? 0 : 1;
+        const db = new sqlite3.Database('./database.db')
         db.run('UPDATE songs SET isFavorite = ? WHERE id = ?', [toggleTo, data.songToToggle.id], function(err) {
             if (err) {
                 reject(err);
             } else {
+                db.close((err) => {
+                    if (err) {
+                        console.error(err.message);
+                    } else {
+                        console.log('Database connection closed.');
+                    }
+                })
                 resolve(toggleTo);
             }
-        });
-    });
+        })
+    })
 }
 ipcMain.handle('toggle-favorite', async (event, data) => {
     try{
@@ -148,10 +180,18 @@ ipcMain.handle('update-last-played', async (event, data) => {
 async function updateLastPlayed(data) {
     return new Promise((resolve, reject) => {
         const timestamp = new Date().toISOString();
+        const db = new sqlite3.Database('./database.db')
         db.run('UPDATE songs SET lastPlayed = ? WHERE id = ?', [timestamp, data.id], function (err) {
             if (err) {
                 reject(err);
             } else {
+                db.close((err) => {
+                    if (err) {
+                        console.error(err.message);
+                    } else {
+                        console.log('Database connection closed.');
+                    }
+                })
                 resolve("Updated successfully")
             }
         })
@@ -169,10 +209,18 @@ ipcMain.handle('update-database', async (event, data) => {
 
 async function updateDatabase(data) {
     return new Promise((resolve, reject) => {
+        const db = new sqlite3.Database('./database.db')
         db.run('UPDATE songs SET title = ? WHERE id = ?', [data.title, data.id], function(err) {
             if (err) {
                 reject(err);
             } else {
+                db.close((err) => {
+                    if (err) {
+                        console.error(err.message);
+                    } else {
+                        console.log('Database connection closed.');
+                    }
+                })
                 resolve();
             }
         });
@@ -201,9 +249,10 @@ ipcMain.on('create-directory', (event, directoryPath) => {
         console.error(`Error creating directory: ${directoryPath}`, error);
         event.returnValue = false;
     }
-});
-db.serialize(() => {
-    db.run(`
+})
+const database = new sqlite3.Database('./database.db');
+database.serialize(() => {
+    database.run(`
         CREATE TABLE IF NOT EXISTS songs (
             id INTEGER PRIMARY KEY,
             title TEXT,
@@ -239,8 +288,9 @@ db.serialize(() => {
             dateAdded TEXT DEFAULT CURRENT_TIMESTAMP,
             lastPlayed TEXT
         );
-    `);
-});
+    `)
+})
+
 
 function createWindow(){
     win = new BrowserWindow({

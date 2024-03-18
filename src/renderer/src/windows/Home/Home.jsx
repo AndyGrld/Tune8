@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { songs } from '../../constants'
 import './Home.css'
 
-const Home = () => {
+const Home = ({lastSongs, recentSongs}) => {
 
     return (
         <div className="home-window">
@@ -19,12 +19,14 @@ const Home = () => {
                 <h1 id="first_home">Recently Added</h1>
                 <div className="music-grid">
                     {
-                        songs.map(song => (
-                            <div className='music-cell' key={song.title}>
-                                <img src={song.img}/>
-                                <p>{song.album}</p>
+                        lastSongs
+                        ?lastSongs.map(song => (
+                            <div className='music-cell' key={song.id}>
+                                <img src={song.imageSrc}/>
+                                <p>{song.tag.tags.title}</p>
                             </div>
                         ))
+                        :<h1>No song played yet</h1>
                     }
                 </div>
             </div>
@@ -32,12 +34,14 @@ const Home = () => {
                 <h1>Recently Played</h1>
                 <div className="music-grid">
                     {
-                        songs.map(song => (
-                            <div className='music-cell' key={song.title}>
-                                <img src={song.img}/>
-                                <p>{song.title}</p>
+                        recentSongs
+                        ?recentSongs.map(song => (
+                            <div className='music-cell' key={song.id}>
+                                <img src={song.imageSrc}/>
+                                <p>{song.tag.tags.title}</p>
                             </div>
                         ))
+                        :<h1>No song played yet</h1>
                     }
                 </div>
             </div>

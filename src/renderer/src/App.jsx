@@ -28,6 +28,8 @@ const App = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") ?  localStorage.getItem("theme") : 'light')
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [favoriteSongs, setFavoriteSongs] = useState([])
+  const [lastSongs, setLastSongs] = useState([])
+  const [recentSongs, setRecentSongs] = useState([])
 
   useEffect(() => {
     const index = queueSongs.findIndex(song => song === currentSong);
@@ -44,10 +46,20 @@ const App = () => {
     fetchItems()
   }, [])
 
-  // setup favorites
+  // setup favorites, last played, recent songs
   useEffect(() => {
+    const tempSongs = [...allSongs]
     const favorites = allSongs.filter(song => song.isFavorite === 1)
     setFavoriteSongs(favorites)
+    const lastPlayedSongs = tempSongs.filter(song => song.lastPlayed)
+      .sort()
+      .reverse()
+      .slice(0, 21)
+    setLastSongs(lastPlayedSongs)
+    const recentlyAddedSongs = tempSongs.sort((a, b) => a.lastPlayed - b.lastPlayed)
+    .reverse()
+      .slice(0, 21)
+    setRecentSongs(recentlyAddedSongs)
   }, [allSongs])
 
   // change music progress in now playing
@@ -81,6 +93,7 @@ const App = () => {
         }
     }
     saveLastPlayedAsync()
+    // setLastSongs(...lastSongs, currentSong)
 }, [currentSong])
 
   // function to fetch all songs
@@ -189,7 +202,7 @@ const App = () => {
         nextSong={nextSong} prevSong={prevSong} theme={theme} queueSongs={queueSongs} setAllSongs={setAllSongs}
         currentIndex={currentIndex} favoriteSongs={favoriteSongs} setFavoriteSongs={setFavoriteSongs}
         setCurrentSong={setCurrentSong}/>}>
-          <Route index element={<Home/>}></Route>
+          <Route index element={<Home lastSongs={lastSongs} recentSongs={recentSongs}/>}></Route>
           <Route path='albums' element={<Albums allSongs={allSongs}/>}></Route>
           <Route path='songs' element={<Songs allSongs={allSongs} isPlaying={isPlaying}
             currentSong={currentSong} PlayPause={PlayPause}/>}></Route>
