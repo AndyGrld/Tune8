@@ -114,6 +114,22 @@ async function readFromFile(savePath, single = false){
         return []
     }
 }
+function processLyrics(lyrics) {
+    let lines = lyrics.split(/\n\n|\n|\r\n/)
+    lines.shift()
+    for (let i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].trim()
+        if(lines[i].startsWith("[") && i != 0){
+            lines[i] = `</br><p>${lines[i]}.</p>`
+        }else{
+            lines[i] = `<p>${lines[i]}.</p>`
+        }
+    }
+    let formattedLyrics = lines.join('')
+    return formattedLyrics
+}
+let a = 'afj;ds'
+a.startsWith("")
 function readJsonFile(filePath) {
     try {
         const data = fs.readFileSync(filePath, 'utf8');
@@ -216,7 +232,7 @@ contextBridge.exposeInMainWorld('electron', {
                 // File does not exist or cannot be read
             }
             if(lyricsFileContent){
-                return lyricsFileContent;
+                return processLyrics(lyricsFileContent)
             }else{
                 // Fetch lyrics from API
                 console.log(song.tag.tags.title.split('|')[0])
@@ -231,7 +247,7 @@ contextBridge.exposeInMainWorld('electron', {
                     }
                     // Save lyrics to file
                     await fs.writeFile(lyricsFilePath, lyricsFileContent, 'utf8');
-                    return lyricsFileContent;
+                    return lyricsFileContent
                 } else {
                     return "Not found";
                 }

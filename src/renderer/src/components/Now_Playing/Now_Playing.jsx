@@ -233,9 +233,9 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                     <h1>{currentSong.tag.tags.title}</h1>
                 </div>
                 <div className="lyrics">
-                    <p>
-                        {songLyrics}
-                    </p>
+                    <div className='lyrics_words'>
+                    <div dangerouslySetInnerHTML={{ __html: songLyrics }} />
+                    </div>
                 </div>
             </div>
             :<div className="lyrics_container">

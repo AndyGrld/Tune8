@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import './App.css'
 import React from 'react'
 
@@ -71,18 +71,6 @@ const App = () => {
     }, 1000)
   }, [isPlaying])
 
-  // plays next song if current song has ended
-  useEffect(() => {
-    const audio = audioElem.current
-    const handleEnded = () => {
-      nextSong()
-    }
-    audio.addEventListener('ended', handleEnded)
-    return () => {
-      audio.removeEventListener('ended', handleEnded)
-    }
-  }, [currentSong])
-
   // update last played on current song change
   useEffect(() => {
     const saveLastPlayedAsync = async () => {
@@ -133,22 +121,33 @@ const App = () => {
     }, 1)
   }
 
-  function nextSong(){
+  const nextSong = useCallback(() => {
+    const audio = audioElem.current
     if (queueSongs.length === 1) {
-      // If there is only one song in the queue, reset to the beginning of the song
-      audioElem.current.currentTime = 0;
+      audio.currentTime = 0
     } else {
-      if (currentIndex === (queueSongs.length - 1)) {
-        setCurrentSong(queueSongs[0]);
-      } else {
-        setCurrentSong(queueSongs[currentIndex + 1]);
-      }
+      const nextIndex = currentIndex === queueSongs.length - 1 ? 0 : currentIndex + 1
+      setCurrentIndex(nextIndex)
+      setCurrentSong(queueSongs[nextIndex])
     }
-    setTimeout(()=>{
-      audioElem.current.play()
+    setTimeout(() => {
+      audio.play()
       setIsPlaying(true)
     }, 1)
-  }
+  }, [audioElem, queueSongs, currentIndex, setCurrentIndex, setCurrentSong, setIsPlaying])
+
+  
+  // plays next song if current song has ended
+  useEffect(() => {
+    const audio = audioElem.current;
+    const handleEnded = () => {
+      nextSong();
+    };
+    audio.addEventListener('ended', handleEnded);
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [currentSong, nextSong])
 
   function PlayPause(song, queue = allSongs, refreshQueue = true) {
     // keep refreshQueue to prevent re-rendering when a song is clicked on now playing

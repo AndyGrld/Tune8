@@ -272,7 +272,7 @@
 .now-playing .lyrics_container .lyrics {
   overflow-y: scroll;
 }
-.now-playing .lyrics_container .lyrics p {
+.now-playing .lyrics_container .lyrics .lyrics_words {
   margin: 40px 0;
   font-size: 1em;
   line-height: 2em;
