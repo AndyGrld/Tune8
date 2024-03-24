@@ -118,3 +118,11 @@
         }
     }
 }
+
+@media screen and (max-width: 768px) {
+    .favorites_window ul li{
+        .cell5{
+            display: none;
+        }
+    }
+}

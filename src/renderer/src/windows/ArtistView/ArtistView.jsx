@@ -42,7 +42,11 @@ const ArtistView = ({allSongs, PlayPause, currentSong, isPlaying}) => {
             <div className='nav_space'></div>
             <div className="artist_card">
                 <div className='img'>
-                    <img src={artistAlbumsMap[0].imageSrc}/>
+                    <img src={artistAlbumsMap[0].imageSrc}
+                    onError={(e) => { 
+                        e.target.onerror = null; 
+                        e.target.src = '/my_images/placeholders/music/2.jpg' 
+                    }}/>
                 </div>
                 <div className='info'>
                     <div>
@@ -61,10 +65,14 @@ const ArtistView = ({allSongs, PlayPause, currentSong, isPlaying}) => {
                 {
                     artistAlbumsMap.length > 0
                     ? artistAlbumsMap.map(song => (
-                        <div key={song.tag.tags.title} className={song === currentSong ? 'highlight songs-info' : "songs-info"}
+                        <div key={song.id} className={song === currentSong ? 'highlight songs-info' : "songs-info"}
                         onClick={() => PlayPause(song, artistAlbumsMap, true)}>
                             <div className="album_cover">
-                                <img src={song.imageSrc}/>
+                                <img src={song.imageSrc}
+                                onError={(e) => { 
+                                    e.target.onerror = null; 
+                                    e.target.src = '/my_images/placeholders/music/2.jpg' 
+                                }}/>
                                 <div>
                                     {
                                         (currentSong === song && isPlaying)

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './Songs.css';
 import { BsPauseCircle, BsPlayCircle } from 'react-icons/bs';
-import { debounce } from 'lodash'; // Import debounce function from lodash library
+import { debounce } from 'lodash';
 
 const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
     const [visibleSongs, setVisibleSongs] = useState(20);
@@ -14,14 +14,15 @@ const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
     }, [allSongs]);
 
     const searchingSongs = debounce((value) => {
-        setSearchSongs(value.toLowerCase()); // Convert search query to lowercase for case-insensitive search
+        setSearchSongs(value.toLowerCase());
         if (value !== "") {
             const query = allSongs.filter(song => song.tag.tags.title.toLowerCase().includes(value));
             setQuerySongs(query);
+            setVisibleSongs(50)
         } else {
             setQuerySongs([]);
         }
-    }, 300); // 300 milliseconds debounce time
+    }, 300);
 
     function ShuffleAndPlay() {
         const newQueue = shuffleArray(allSongs);
@@ -31,9 +32,13 @@ const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
     const renderedSongs = useMemo(() => {
         return searchSongs === ""
             ? allSongs.slice(0, visibleSongs).map(song => (
-                <li onClick={() => PlayPause(song, allSongs, true)} key={song.index} className={song === currentSong ? 'highlight' : ""}>
+                <li onClick={() => PlayPause(song, allSongs, true)} key={song.id} className={song === currentSong ? 'highlight' : ""}>
                     <div className="img_div">
-                        <img src={song.imageSrc} alt={song.tag.tags.title} />
+                        <img src={song.imageSrc}
+                        onError={(e) => {
+                            e.target.onerror = null
+                            e.target.src = '/my_images/placeholders/music/3.jpg' 
+                        }}/>
                         <div>
                             {currentSong === song && isPlaying ? <BsPauseCircle /> : <BsPlayCircle />}
                         </div>
@@ -47,9 +52,9 @@ const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
             : querySongs.length === 0
                 ? <h1 id='notFound'>No result found</h1>
                 : querySongs.map(song => (
-                    <li onClick={() => PlayPause(song, allSongs, true)} key={song.index} className={song === currentSong ? 'highlight' : ""}>
+                    <li onClick={() => PlayPause(song, allSongs, true)} key={song.id} className={song === currentSong ? 'highlight' : ""}>
                         <div className="img_div">
-                            <img src={song.imageSrc} alt={song.tag.tags.title} />
+                            <img src={song.imageSrc}/>
                             <div>
                                 {currentSong === song && isPlaying ? <BsPauseCircle /> : <BsPlayCircle />}
                             </div>
@@ -62,16 +67,12 @@ const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
                 ));
     }, [allSongs, currentSong, isPlaying, PlayPause, visibleSongs, querySongs, searchSongs]);
 
-    const handleScroll = () => {
-        if (window.innerHeight + document.documentElement.scrollTop > document.documentElement.offsetHeight - 200) {
-            setVisibleSongs(prevVisibleSongs => Math.min(prevVisibleSongs + 30, totalSongs));
-        }
-    };
-
+    // stream songs
     useEffect(() => {
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [totalSongs, visibleSongs]);
+        setInterval(() => {
+            setVisibleSongs(prevVisibleSongs => Math.min(prevVisibleSongs + 30, totalSongs))
+        }, 50)
+    }, [totalSongs])
 
     return (
         <div className="songs_window">

@@ -1,12 +1,26 @@
 import './Queue.css'
+import { useEffect, useState } from 'react'
 import { BsPauseCircle, BsPlayCircle } from 'react-icons/bs'
 
-const Queue = ({ PlayPause, currentSong, isPlaying, queueSongs }) => {
+const Queue = ({ PlayPause, currentSong, isPlaying, queueSongs,
+    handleContextMenu, handleMenuItemClick, contextMenuPosition,
+    contextMenuVisible }) => {
+    const [visibleSongs, setVisibleSongs] = useState(40);
+    const [totalSongs, setTotalSongs] = useState(queueSongs.length);
 
     function ShuffleAndPlay(){
         const newQueue = shuffleArray(queueSongs)
         PlayPause(newQueue[0], newQueue, true)
     }
+    useEffect(() => {
+        setTotalSongs(queueSongs.length);
+    }, [queueSongs]);
+
+    useEffect(() => {
+        setInterval(() => {
+            setVisibleSongs(prevVisibleSongs => Math.min(totalSongs, prevVisibleSongs + 50))
+        }, 50)
+    }, [totalSongs])
 
     return (
         <div className="queue_window">
@@ -28,10 +42,16 @@ const Queue = ({ PlayPause, currentSong, isPlaying, queueSongs }) => {
             <ul>
                 {
                     queueSongs.length > 0
-                    ?queueSongs.map(song => (
-                        <li onClick={() => PlayPause(song, queueSongs, true)} key={song.index} className={song === currentSong ? 'highlight' : ""}>
+                    ?queueSongs.slice(0, visibleSongs).map(song => (
+                        <li onClick={() => PlayPause(song, queueSongs, true)} key={song.id}
+                        onContextMenu={() => handleContextMenu(event, song, "Queue")}
+                        className={song === currentSong ? 'highlight' : ""}>
                             <div className="img_div">
-                                <img src={song.imageSrc}/>
+                                <img src={song.imageSrc}
+                                onError={(e) => {
+                                    e.target.onerror = null
+                                    e.target.src = '/my_images/placeholders/music/4.jpg'
+                                }}/>
                                 <div>
                                     {
                                         (currentSong === song && isPlaying)
@@ -53,6 +73,28 @@ const Queue = ({ PlayPause, currentSong, isPlaying, queueSongs }) => {
                     </div>
                 }
             </ul>
+            {contextMenuVisible && (
+                <div className="container">
+                    <div className="context-menu" style={{ top: contextMenuPosition.y, left: contextMenuPosition.x }}>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('Play')}>
+                            Play
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('PlayNext')}>
+                            Play Next
+                        </div>
+                        <hr/>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('RemoveFromQueue')}>
+                            Remove from Queue
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('AddToPlaylist')}>
+                            Add to Playlist
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('AddToFavorite')}>
+                            Add to Favorite
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

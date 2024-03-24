@@ -20,21 +20,86 @@ import ScrollToTop from './components/ScrollToTop';
 
 const App = () => {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentSong, setCurrentSong] = useState(null)
   const audioElem = useRef()
   const [musicProgress, setMusicProgress] = useState(0)
   const [allSongs, setAllSongs] = useState([])
+  const [currentSong, setCurrentSong] = useState(null)
   const [queueSongs, setQueueSongs] = useState([])
   const [theme, setTheme] = useState(localStorage.getItem("theme") ?  localStorage.getItem("theme") : 'light')
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [favoriteSongs, setFavoriteSongs] = useState([])
   const [lastSongs, setLastSongs] = useState([])
   const [recentSongs, setRecentSongs] = useState([])
+  const [contextMenuVisible, setContextMenuVisible] = useState(false)
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })
+  const [clickedSong, setClickedSong] = useState(null)
+  const [currentWindow, setCurrentWindow] = useState("Home")
+  
+  // context menu
+  const handleContextMenu = (event, song, window) => {
+    event.preventDefault()
+    setClickedSong(song)
+    setCurrentWindow(window)
+    setContextMenuPosition({ x: event.clientX, y: event.clientY })
+    setContextMenuVisible(true)
+  }
+  function insertSongAfterCurrent(){
+    let index = 0
+    if(currentSong){
+      index = currentIndex
+    }
+    setQueueSongs(prevQueue => {
+      const newQueue = [...prevQueue]
+      newQueue.splice(index, 0, clickedSong)
+      return newQueue
+    })
+    setTimeout(async () => {
+      saveQueueSongs()
+    }, 3)
+  }
+  const handleMenuItemClick = (menuItem) => {
+      switch (menuItem){
+        case 'Play':
+          if(currentWindow === 'Favorites'){
+            PlayPause(clickedSong, favoriteSongs, true)
+          }
+          break
+        case 'PlayNext':
+          insertSongAfterCurrent()
+          break;
+        case 'AddToQueue':
+          setQueueSongs(prevQueueSongs => [...prevQueueSongs, clickedSong]);
+          setTimeout(async () => {
+            saveQueueSongs()
+          }, 3)
+          break
+        case 'RemoveFromQueue':
+          setQueueSongs(prevSongs => {
+            const newQueue = [...prevSongs]
+            const index = queueSongs.findIndex(song => song.id === clickedSong.id)
+            newQueue.splice(index, 1)
+            return newQueue
+          })
+          setTimeout(async () => {
+            saveQueueSongs()
+          }, 3)
+          break
+        case 'AddToPlaylist':
+          break
+        case 'RemoveFromFavorite':
+          break
+        case 'AddToFavorite':
+          break
+        default:
+          console.log("Clear")
+      }
+      setContextMenuVisible(false);
+  }
 
   useEffect(() => {
     const index = queueSongs.findIndex(song => song === currentSong);
     setCurrentIndex(index);
-  }, [currentSong, queueSongs]);
+  }, [currentSong, queueSongs])
 
   function changeTheme(newTheme){
     setTheme(newTheme)
@@ -95,6 +160,7 @@ const App = () => {
           setAllSongs(directoryContents)
           const prevQueue = await window.electron.readQueue()
           if(prevQueue){
+            console.log("queue length: ", prevQueue.length)
             if(prevQueue.length > 0){
               setQueueSongs(prevQueue)
             }
@@ -149,28 +215,35 @@ const App = () => {
     };
   }, [currentSong, nextSong])
 
+  async function saveQueueSongs(){
+    try {
+      const saved = await window.electron.saveQueue(queueSongs);
+      if (saved) {
+        console.log('Queue saved successfully');
+      } else {
+        console.log('Queue not saved');
+      }
+    } catch (error) {
+      console.error('Error saving queue:', error);
+    }
+  }
+
   function PlayPause(song, queue = allSongs, refreshQueue = true) {
     // keep refreshQueue to prevent re-rendering when a song is clicked on now playing
     if (refreshQueue) {
       if(queueSongs === queue){
         console.log("not refreshing queue")
       }else{
+        setQueueSongs(queue)
         setTimeout(async () => {
-          setQueueSongs(queue)
-          try {
-            const saved = await window.electron.saveQueue(queueSongs);
-            if (saved) {
-              console.log('Queue saved successfully');
-            } else {
-              console.log('Queue not saved');
-            }
-          } catch (error) {
-            console.error('Error saving queue:', error);
-          }
-        }, 1)
+          saveQueueSongs()
+        }, 3)
       }
     }else if(queueSongs.length === 0){
       setQueueSongs(allSongs)
+      setTimeout(async () => {
+        saveQueueSongs()
+      }, 3)
     }
   
       if (currentSong === song) {
@@ -200,18 +273,25 @@ const App = () => {
         audioElem={audioElem} musicProgress={musicProgress} setMusicProgress={setMusicProgress}
         nextSong={nextSong} prevSong={prevSong} theme={theme} queueSongs={queueSongs} setAllSongs={setAllSongs}
         currentIndex={currentIndex} favoriteSongs={favoriteSongs} setFavoriteSongs={setFavoriteSongs}
+        handleContextMenu={handleContextMenu} handleMenuItemClick={handleMenuItemClick}
+        contextMenuVisible={contextMenuVisible} contextMenuPosition={contextMenuPosition}
         setCurrentSong={setCurrentSong}/>}>
-          <Route index element={<Home lastSongs={lastSongs} recentSongs={recentSongs}/>}></Route>
+          <Route index element={<Home lastSongs={lastSongs} recentSongs={recentSongs} PlayPause={PlayPause}
+            currentSong={currentSong} isPlaying={isPlaying}/>}></Route>
           <Route path='albums' element={<Albums allSongs={allSongs}/>}></Route>
           <Route path='songs' element={<Songs allSongs={allSongs} isPlaying={isPlaying}
             currentSong={currentSong} PlayPause={PlayPause}/>}></Route>
           <Route path='artists' element={<Artists allSongs={allSongs}/>}></Route>
           <Route path='queue' element={<Queue isPlaying={isPlaying}
+            handleContextMenu={handleContextMenu} handleMenuItemClick={handleMenuItemClick}
+            contextMenuVisible={contextMenuVisible} contextMenuPosition={contextMenuPosition}
             currentSong={currentSong} PlayPause={PlayPause} queueSongs={queueSongs}/>}></Route>
           <Route path='playlist' element={<Playlist isPlaying={isPlaying}
             currentSong={currentSong} PlayPause={PlayPause} queueSongs={queueSongs}/>}></Route>
           <Route path='favorites' element={<Favorites isPlaying={isPlaying}
             currentSong={currentSong} PlayPause={PlayPause} queueSongs={queueSongs}
+            handleContextMenu={handleContextMenu} handleMenuItemClick={handleMenuItemClick}
+            contextMenuVisible={contextMenuVisible} contextMenuPosition={contextMenuPosition}
             favoriteSongs={favoriteSongs} setFavoriteSongs={setFavoriteSongs}/>}></Route>
           <Route path='settings' element={<Settings changeTheme={changeTheme} fetchItems={fetchItems}/>}></Route>
           <Route path='artist' element={<Artist/>}>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { alphabets } from '../../constants';
 import './Albums.css'
+import { BsPlayCircle } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 
 const Albums = ({allSongs}) => {
@@ -18,7 +19,6 @@ const Albums = ({allSongs}) => {
             });
         }, 30)
     }
-    
     const albumMap = useMemo(() => {
         return alphabets.reduce((acc, alphabet) => {
             const albums = allSongs.filter(song => song.tag.tags.album.toLowerCase().startsWith(alphabet.toLowerCase()));
@@ -59,7 +59,8 @@ const Albums = ({allSongs}) => {
                                             return(
                                                 <Link key={album} to={`/album/${album}`}>
                                                     <div className="div">
-                                                        <div>
+                                                        <div className='image_holder'>
+                                                            <div><BsPlayCircle/></div>
                                                             <img src={albumData.imageSrc}
                                                             onError={(e) => { 
                                                                 e.target.onerror = null; 
@@ -101,8 +102,6 @@ const Albums = ({allSongs}) => {
                     })
                 )
             }
-            
-
         </div>
     )
 }

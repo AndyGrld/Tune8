@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { songs } from '../../constants'
+import { BsPlayCircle, BsPauseCircle } from 'react-icons/bs';
 import './Home.css'
 
-const Home = ({lastSongs, recentSongs}) => {
+const Home = ({lastSongs, recentSongs, PlayPause, currentSong,
+    isPlaying}) => {
 
     return (
         <div className="home-window">
@@ -22,7 +24,20 @@ const Home = ({lastSongs, recentSongs}) => {
                         lastSongs
                         ?lastSongs.map(song => (
                             <div className='music-cell' key={song.id}>
-                                <img src={song.imageSrc}/>
+                                <div onClick={() => PlayPause(song, [song], true)}>
+                                    {
+                                        currentSong
+                                        ?currentSong.id == song.id && isPlaying
+                                            ?<BsPauseCircle/>
+                                            :<BsPlayCircle/>
+                                        :<BsPlayCircle/>
+                                    }
+                                </div>
+                                <img src={song.imageSrc}
+                                onError={(e) => {
+                                    e.target.onerror = null
+                                    e.target.src = '/my_images/placeholders/music/2.jpg' 
+                                }}/>
                                 <p>{song.tag.tags.title}</p>
                             </div>
                         ))
@@ -37,7 +52,20 @@ const Home = ({lastSongs, recentSongs}) => {
                         recentSongs
                         ?recentSongs.map(song => (
                             <div className='music-cell' key={song.id}>
-                                <img src={song.imageSrc}/>
+                                <div onClick={() => PlayPause(song, [song], true)}>
+                                    {
+                                        currentSong
+                                        ?currentSong.id == song.id
+                                            ?<BsPauseCircle/>
+                                            :<BsPlayCircle/>
+                                        :<BsPlayCircle/>
+                                    }
+                                </div>
+                                <img src={song.imageSrc}
+                                onError={(e) => {
+                                    e.target.onerror = null
+                                    e.target.src = '/my_images/placeholders/music/2.jpg' 
+                                }}/>
                                 <p>{song.tag.tags.title}</p>
                             </div>
                         ))

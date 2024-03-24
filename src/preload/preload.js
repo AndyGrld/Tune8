@@ -79,19 +79,22 @@ async function insertAllMusicDataIntoDatabase(dataArray) {
 }
 
 async function saveDataToFile(data, savePath, FileName = "musicData_") {
-    const chunks = Math.ceil(data.length / 20);
-    for (let i = 0; i < chunks; i++) {
-        const start = i * 20;
-        const end = (i + 1) * 20;
-        const chunkData = data.slice(start, end);
-        const fileName = `${FileName}${i + 1}.json`;
-        const filePath = path.join(savePath, fileName);
-        try {
-            await fs.writeFile(filePath, JSON.stringify(chunkData, null, 2));
-        } catch (error) {
-            console.error(`Error saving ${fileName}:`, error);
+    setTimeout(async () => {
+        const chunks = Math.ceil(data.length / 20);
+        for (let i = 0; i < chunks; i++) {
+            const start = i * 20;
+            const end = (i + 1) * 20;
+            const chunkData = data.slice(start, end);
+            const fileName = `${FileName}${i + 1}.json`;
+            const filePath = path.join(savePath, fileName);
+            try {
+                console.log("saving queue: ", i)
+                await fs.writeFile(filePath, JSON.stringify(chunkData, null, 2));
+            } catch (error) {
+                console.error(`Error saving ${fileName}:`, error);
+            }
         }
-    }
+    }, 5)
 }
 
 async function readFromFile(savePath, single = false){
@@ -128,8 +131,6 @@ function processLyrics(lyrics) {
     let formattedLyrics = lines.join('')
     return formattedLyrics
 }
-let a = 'afj;ds'
-a.startsWith("")
 function readJsonFile(filePath) {
     try {
         const data = fs.readFileSync(filePath, 'utf8');
@@ -201,12 +202,19 @@ contextBridge.exposeInMainWorld('electron', {
         ipcRenderer.send('play-song', songUrl);
     },
     saveQueue: async (queue) => {
-        try{
+        try {
             await deleteFilesInFolder(queueSavedData);
+            console.log("Deleted old queue data");
+        } catch (error) {
+            console.error("Error deleting old queue data:", error);
+        }
+        try {
             await saveDataToFile(queue, queueSavedData, "queueData_");
-            return true
-        }catch(error){
-            console.error("Error saving to file: ", error)
+            console.log("Saving queue data");
+            return true;
+        } catch (error) {
+            console.error("Error saving queue data:", error);
+            return false;
         }
     },
     readQueue: async () => {

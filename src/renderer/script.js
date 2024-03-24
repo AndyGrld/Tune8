@@ -1,5 +1,4 @@
 let lyricsShow = false;
-let favorite = []
 
 function showNowPlaying(){
     const playBar = document.getElementsByClassName('now-playing')

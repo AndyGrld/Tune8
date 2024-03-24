@@ -1,11 +1,13 @@
 import './Favorites.css'
+import { useState } from 'react'
 import { BsPauseCircle, BsPlayCircle } from 'react-icons/bs'
 
 const Favorites = ({ PlayPause, currentSong, isPlaying,
-    favoriteSongs, setFavoriteSongs }) => {
+    favoriteSongs, setFavoriteSongs, handleContextMenu,
+    handleMenuItemClick, contextMenuPosition, contextMenuVisible}) => {
 
     function ShuffleAndPlay(){
-        const newQueue = shuffleArray(allSongs)
+        const newQueue = shuffleArray(favoriteSongs)
         PlayPause(newQueue[0], newQueue, true)
     }
 
@@ -33,7 +35,9 @@ const Favorites = ({ PlayPause, currentSong, isPlaying,
                 {
                     favoriteSongs.length > 0
                     ?favoriteSongs.map(song => (
-                        <li onClick={() => PlayPause(song, favoriteSongs, true)} key={song.index} className={song === currentSong ? 'highlight' : ""}>
+                        <li onClick={() => PlayPause(song, favoriteSongs, true)} key={song.index}
+                        className={song === currentSong ? 'highlight' : ""}
+                        onContextMenu={() => handleContextMenu(event, song, "Favorites")}>
                             <div className="img_div">
                                 <img src={song.imageSrc}/>
                                 <div>
@@ -56,6 +60,28 @@ const Favorites = ({ PlayPause, currentSong, isPlaying,
                     </div>
                 }
             </ul>
+            {contextMenuVisible && (
+                <div className="container">
+                    <div className="context-menu" style={{ top: contextMenuPosition.y, left: contextMenuPosition.x }}>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('Play')}>
+                            Play
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('PlayNext')}>
+                            Play Next
+                        </div>
+                        <hr/>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('AddToQueue')}>
+                            Add to Queue
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('AddToPlaylist')}>
+                            Add to Playlist
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('RemoveFromFavorite')}>
+                            Remove from Favorite
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

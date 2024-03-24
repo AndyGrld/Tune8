@@ -179,7 +179,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                     {
                         currentIndex === -1 
                         ? queueSongs.slice(0, 5).map(song => (
-                            <div  className={song === currentSong ? 'highlight queue-cell' : "queue-cell"} key={song.tag.tags.title}
+                            <div  className={song === currentSong ? 'highlight queue-cell' : "queue-cell"} key={song.id}
                             onClick={() => PlayPause(song, [], false)} onContextMenu={(e) => handleContextMenu(e, song)}>
                                 <div className='image_name'>
                                     <img src={song.imageSrc}/>
@@ -195,7 +195,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                         ))
                         : currentIndex + 5 > queueSongs.length -1 
                         ? queueSongs.slice(queueSongs.length - 5).map(song => (
-                            <div  className={song === currentSong ? 'highlight queue-cell' : "queue-cell"} key={song.tag.tags.title} onClick={() => PlayPause(song, [], false)}>
+                            <div  className={song === currentSong ? 'highlight queue-cell' : "queue-cell"} key={song.id} onClick={() => PlayPause(song, [], false)}>
                                 <div className='image_name'>
                                     <img src={song.imageSrc}/>
                                     <div>
@@ -209,7 +209,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                             </div>
                         ))
                         : queueSongs.slice(currentIndex, currentIndex + 5).map(song => (
-                            <div  className={song === currentSong ? 'highlight queue-cell' : "queue-cell"} key={song.index} onClick={() => PlayPause(song, [], false)}>
+                            <div  className={song === currentSong ? 'highlight queue-cell' : "queue-cell"} key={song.id} onClick={() => PlayPause(song, [], false)}>
                                 <div className='image_name'>
                                     <img src={song.imageSrc}/>
                                     <div>
@@ -259,10 +259,6 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                             {currentSong.tag.tags.title}
                         </h3>
                     </div>
-                    {/* <div className='artist_album'>
-                        <h3 className='s_title'>{currentSong.tag.tags.artist}</h3>
-                        <h3 className='s_album'>{currentSong.tag.tags.album}</h3>
-                    </div> */}
                     <div className="time">
                         <p id='start'>
                             {`${writeTime(Math.floor(musicProgress / 60))}:${writeTime(Math.floor(musicProgress % 60))}`}

@@ -56,8 +56,6 @@
   --now-playing: var(--album-card);
   --img-brightness-color: rgba(255, 255, 255, 0.3);
 }
-body{
-}
 body::-webkit-scrollbar-thumb {
   background-color: grey;
   border-radius: 10px;
@@ -156,4 +154,33 @@ h1{
   100%{
     transform: rotate(360deg) scaleY(6);
   }
+}
+
+.context-overlay{
+  position: absolute;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+.context-menu{
+  position: absolute;
+  background-color: red;
+  background-color: var(--bg-color);
+  box-shadow: inset 0 0 5px rgb(0, 0, 0);
+  padding: 2px;
+  border-radius: 5px;
+  z-index: 11;
+}
+.context-menu .context-menu-item{
+  padding: 3px;
+  color: var(--txt-color);
+  font-size: .9em;
+}
+.context-menu .context-menu-item:hover{
+  background-color: var(--song-list-bg);
+  cursor: pointer;
+  border-radius: 6px;
 }

@@ -64,10 +64,10 @@ const Artists = ({allSongs}) => {
                                                     <div className='div'>
                                                         <div>
                                                             <img src={artistData.imageSrc} alt={artist} loading='lazy'
-                                                                // onError={(e) => {
-                                                                //     Set a fallback image source when the original image fails to load
-                                                                //     e.target.src = "my_images/placeholders/music/1.jpg";
-                                                                // }}
+                                                                onError={(e) => { 
+                                                                    e.target.onerror = null; 
+                                                                    e.target.src = '/my_images/placeholders/music/1.jpg' 
+                                                                }}
                                                             />
                                                         </div>
                                                         <h3>{artist}</h3>

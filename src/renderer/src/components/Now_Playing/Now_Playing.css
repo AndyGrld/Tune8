@@ -290,6 +290,10 @@
     transform: rotate(360deg);
   }
 }
+.mini-player {
+  display: none;
+}
+
 @media (max-width: 400px) {
   body {
     overflow: hidden;

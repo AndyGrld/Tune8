@@ -114,4 +114,10 @@
 }
 .favorites_window ul .no_queue {
   color: var(--txt-color);
+}
+
+@media screen and (max-width: 768px) {
+  .favorites_window ul li .cell5 {
+    display: none;
+  }
 }/*# sourceMappingURL=Favorites.css.map */
