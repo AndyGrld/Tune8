@@ -30,11 +30,15 @@ async function createFoldersIfNotExist() {
   }
 }
 function createDirectoryIfNotExists(directoryPath) {
-  const success = ipcRenderer.sendSync("create-directory", directoryPath);
-  if (success) {
-    console.log(`Directory created: ${directoryPath}`);
+  if (!fs.existsSync(directoryPath)) {
+    try {
+      fs.mkdirSync(directoryPath, { recursive: true });
+      console.log(`Directory created: ${directoryPath}`);
+    } catch (error) {
+      console.error(`Error creating directory: ${directoryPath} - ${error}`);
+    }
   } else {
-    console.error(`Error creating directory: ${directoryPath}`);
+    console.log(`Directory already exists: ${directoryPath}`);
   }
 }
 async function deleteFilesInFolder(folderPath) {
@@ -216,7 +220,7 @@ contextBridge.exposeInMainWorld("electron", {
       } else {
         console.log(song.tag.tags.title.split("|")[0]);
         const response = await fetch(
-          `https://api.lyrics.ovh/v1/${song.tag.tags.artist}/${song.tag.tags.title.split("|")[0]}`
+          `https://api.lyrics.ovh/v1/${song.tag.tags.artist}/${song.tag.tags.title.split("|")[0].split("ft")[0]}`
         );
         const data = await response.json();
         if (data.lyrics !== void 0) {

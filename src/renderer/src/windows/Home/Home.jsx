@@ -21,8 +21,8 @@ const Home = ({lastSongs, recentSongs, PlayPause, currentSong,
                 <h1 id="first_home">Recently Added</h1>
                 <div className="music-grid">
                     {
-                        lastSongs
-                        ?lastSongs.map(song => (
+                        recentSongs
+                        ?recentSongs.map(song => (
                             <div className='music-cell' key={song.id}>
                                 <div onClick={() => PlayPause(song, [song], true)}>
                                     {
@@ -49,8 +49,8 @@ const Home = ({lastSongs, recentSongs, PlayPause, currentSong,
                 <h1>Recently Played</h1>
                 <div className="music-grid">
                     {
-                        recentSongs
-                        ?recentSongs.map(song => (
+                        lastSongs
+                        ?lastSongs.map(song => (
                             <div className='music-cell' key={song.id}>
                                 <div onClick={() => PlayPause(song, [song], true)}>
                                     {

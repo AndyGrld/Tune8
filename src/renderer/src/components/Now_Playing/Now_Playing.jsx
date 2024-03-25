@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import './Now_Playing.css'
 import {FaRotate, FaCirclePause, FaCirclePlay, FaShuffle, FaForward, FaBackward, FaXmark, FaAngleLeft, FaAngleRight} from 'react-icons/fa6'
 import {ImEnlarge} from 'react-icons/im'
@@ -9,7 +9,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
     musicProgress, setMusicProgress, currentSong, setCurrentSong, queueSongs, currentIndex,
     favoriteSongs, setFavoriteSongs, setAllSongs, allSongs}) => {
     const [viewLyrics, setViewLyrics] = useState(false)
-    const [songLyrics, setSongLyrics] = useState("some lyrics")
+    const [songLyrics, setSongLyrics] = useState("Searching...")
     const [isFavorite, setIsFavorite] = useState(false)
     const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
 
