@@ -77,8 +77,8 @@
   justify-content: center;
 }
 .now-playing .upper .img img {
-  width: min(100%, 180px);
-  height: min(100%, 180px);
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   animation-name: disc-rotate;
   animation-duration: 30s;
@@ -87,8 +87,8 @@
 }
 .now-playing .upper .img::before {
   content: "";
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
   position: absolute;
   left: 50%;
@@ -97,12 +97,6 @@
   transform: translate(-50%, -50%);
   background-color: var(--bg-color);
   box-shadow: 0 0 1px 1px var(--txt-color);
-}
-@media (max-width: 700px) {
-  .now-playing .upper .img::before {
-    width: 15px;
-    height: 15px;
-  }
 }
 .now-playing .upper .artist_album {
   display: grid;

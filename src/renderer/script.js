@@ -28,6 +28,9 @@ function formatDuration(totalSeconds) {
 function hideLyrics(){
     const playBar = document.getElementsByClassName('now-playing')[0]
     const lyrics_container = document.getElementsByClassName('lyrics_container')[0]
+    const disk = document.querySelector('.disk img')
+    disk.style.width = '180px'
+    disk.style.height = '180px'
     playBar.style.display = "flex"
     playBar.style.width = "350px"
     playBar.style.right = "0"
@@ -40,6 +43,9 @@ function showLyrics(){
     let width = window.innerWidth <= 700 ? "70px" : "200px"
     const playBar = document.getElementsByClassName('now-playing')[0]
     const lyrics_container = document.getElementsByClassName('lyrics_container')[0]
+    const disk = document.querySelector('.disk img')
+    disk.style.width = '80px'
+    disk.style.height = '80px'
     playBar.style.display = "grid"
     playBar.style.width = `calc(100% - ${width})`
     playBar.style.right = `-calc(100% - ${width})`

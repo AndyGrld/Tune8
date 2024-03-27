@@ -34,11 +34,7 @@ const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
             ? allSongs.slice(0, visibleSongs).map(song => (
                 <li onClick={() => PlayPause(song, allSongs, true)} key={song.id} className={song === currentSong ? 'highlight' : ""}>
                     <div className="img_div">
-                        <img src={song.imageSrc}
-                        onError={(e) => {
-                            e.target.onerror = null
-                            e.target.src = '/my_images/placeholders/music/3.jpg' 
-                        }}/>
+                        <img src={song.imageSrc}/>
                         <div>
                             {currentSong === song && isPlaying ? <BsPauseCircle /> : <BsPlayCircle />}
                         </div>

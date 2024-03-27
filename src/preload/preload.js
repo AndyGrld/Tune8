@@ -205,19 +205,21 @@ contextBridge.exposeInMainWorld('electron', {
     },
     saveQueue: async (queue) => {
         try {
-            await deleteFilesInFolder(queueSavedData);
             console.log("Deleted old queue data");
         } catch (error) {
             console.error("Error deleting old queue data:", error);
         }
-        try {
-            await saveDataToFile(queue, queueSavedData, "queueData_");
-            console.log("Saving queue data");
-            return true;
-        } catch (error) {
-            console.error("Error saving queue data:", error);
-            return false;
-        }
+        setTimeout(async() => {
+            try {
+                await deleteFilesInFolder(queueSavedData);
+                await saveDataToFile(queue, queueSavedData, "queueData_");
+                console.log("Saving queue data");
+                return true;
+            } catch (error) {
+                console.error("Error saving queue data:", error);
+                return false;
+            }
+        }, 200)
     },
     readQueue: async () => {
         try{

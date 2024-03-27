@@ -117,7 +117,7 @@ const Now_Playing = ({isPlaying, PlayPause, audioElem, nextSong, prevSong,
                 {
                     currentSong ?
                     <div className="upper">
-                        <div className="img">
+                        <div className="img disk">
                             <img src={currentSong.imageSrc}/>
                         </div>
                         <div className="song-title">
