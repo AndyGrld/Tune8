@@ -3,7 +3,9 @@ import './Songs.css';
 import { BsPauseCircle, BsPlayCircle } from 'react-icons/bs';
 import { debounce } from 'lodash';
 
-const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
+const Songs = ({ allSongs, PlayPause, currentSong, isPlaying,
+    handleContextMenu, handleMenuItemClick,
+    contextMenuPosition, contextMenuVisible }) => {
     const [visibleSongs, setVisibleSongs] = useState(20);
     const [totalSongs, setTotalSongs] = useState(allSongs.length);
     const [searchSongs, setSearchSongs] = useState("");
@@ -32,7 +34,9 @@ const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
     const renderedSongs = useMemo(() => {
         return searchSongs === ""
             ? allSongs.slice(0, visibleSongs).map(song => (
-                <li onClick={() => PlayPause(song, allSongs, true)} key={song.id} className={song === currentSong ? 'highlight' : ""}>
+                <li
+                onContextMenu={() => handleContextMenu(event, song, "Songs")}
+                onClick={() => PlayPause(song, allSongs, true)} key={song.id} className={song === currentSong ? 'highlight' : ""}>
                     <div className="img_div">
                         <img src={song.imageSrc}/>
                         <div>
@@ -48,7 +52,9 @@ const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
             : querySongs.length === 0
                 ? <h1 id='notFound'>No result found</h1>
                 : querySongs.map(song => (
-                    <li onClick={() => PlayPause(song, allSongs, true)} key={song.id} className={song === currentSong ? 'highlight' : ""}>
+                    <li
+                    onContextMenu={() => handleContextMenu(event, song, "Songs")}
+                    onClick={() => PlayPause(song, allSongs, true)} key={song.id} className={song === currentSong ? 'highlight' : ""}>
                         <div className="img_div">
                             <img src={song.imageSrc}/>
                             <div>
@@ -103,6 +109,26 @@ const Songs = ({ allSongs, PlayPause, currentSong, isPlaying }) => {
                         {renderedSongs}
                     </ul>
             }
+            
+            {contextMenuVisible && (
+                <div className="container">
+                    <div className="context-menu" style={{ top: contextMenuPosition.y, left: contextMenuPosition.x }}>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('Play')}>
+                            Play
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('PlayNext')}>
+                            Play Next
+                        </div>
+                        <hr/>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('AddToQueue')}>
+                            Add to Queue
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('AddToPlaylist')}>
+                            Add to Playlist
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

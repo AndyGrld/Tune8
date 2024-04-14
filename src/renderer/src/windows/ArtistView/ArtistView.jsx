@@ -3,7 +3,9 @@ import { useParams, useLocation } from 'react-router-dom'
 import { BsPauseCircle, BsPlayCircle } from 'react-icons/bs'
 import './ArtistView.css'
 
-const ArtistView = ({allSongs, PlayPause, currentSong, isPlaying}) => {
+const ArtistView = ({allSongs, PlayPause, currentSong, isPlaying,
+    handleContextMenu, handleMenuItemClick,
+    contextMenuPosition, contextMenuVisible }) => {
     const {artist} = useParams()
 
     const artistAlbumsMap = useMemo(() => {
@@ -65,7 +67,9 @@ const ArtistView = ({allSongs, PlayPause, currentSong, isPlaying}) => {
                 {
                     artistAlbumsMap.length > 0
                     ? artistAlbumsMap.map(song => (
-                        <div key={song.id} className={song === currentSong ? 'highlight songs-info' : "songs-info"}
+                        <div key={song.id}
+                        onContextMenu={() => handleContextMenu(event, song, "Songs")}
+                        className={song === currentSong ? 'highlight songs-info' : "songs-info"}
                         onClick={() => PlayPause(song, artistAlbumsMap, true)}>
                             <div className="album_cover">
                                 <img src={song.imageSrc}
@@ -91,6 +95,26 @@ const ArtistView = ({allSongs, PlayPause, currentSong, isPlaying}) => {
                     :<h2>No albums</h2>
                 }
             </div>
+            
+            {contextMenuVisible && (
+                <div className="container">
+                    <div className="context-menu" style={{ top: contextMenuPosition.y, left: contextMenuPosition.x }}>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('Play')}>
+                            Play
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('PlayNext')}>
+                            Play Next
+                        </div>
+                        <hr/>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('AddToQueue')}>
+                            Add to Queue
+                        </div>
+                        <div className="context-menu-item" onClick={() => handleMenuItemClick('AddToPlaylist')}>
+                            Add to Playlist
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

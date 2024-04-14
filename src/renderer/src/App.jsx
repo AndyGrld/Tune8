@@ -43,6 +43,7 @@ const App = () => {
     setContextMenuPosition({ x: event.clientX, y: event.clientY })
     setContextMenuVisible(true)
   }
+
   function insertSongAfterCurrent(){
     let index = 0
     if(currentSong){
@@ -62,6 +63,9 @@ const App = () => {
         case 'Play':
           if(currentWindow === 'Favorites'){
             PlayPause(clickedSong, favoriteSongs, true)
+          }
+          if(currentWindow === 'Songs'){
+            PlayPause(clickedSong, [clickedSong], true)
           }
           break
         case 'PlayNext':
@@ -279,30 +283,46 @@ const App = () => {
         setCurrentSong={setCurrentSong}/>}>
           <Route index element={<Home lastSongs={lastSongs} recentSongs={recentSongs} PlayPause={PlayPause}
             currentSong={currentSong} isPlaying={isPlaying}/>}></Route>
+
           <Route path='albums' element={<Albums allSongs={allSongs}/>}></Route>
+
           <Route path='songs' element={<Songs allSongs={allSongs} isPlaying={isPlaying}
-            currentSong={currentSong} PlayPause={PlayPause}/>}></Route>
+            currentSong={currentSong} PlayPause={PlayPause}
+            handleContextMenu={handleContextMenu} handleMenuItemClick={handleMenuItemClick}
+            contextMenuVisible={contextMenuVisible} contextMenuPosition={contextMenuPosition}/>}></Route>
+
           <Route path='artists' element={<Artists allSongs={allSongs}/>}></Route>
+
           <Route path='queue' element={<Queue isPlaying={isPlaying}
             handleContextMenu={handleContextMenu} handleMenuItemClick={handleMenuItemClick}
             contextMenuVisible={contextMenuVisible} contextMenuPosition={contextMenuPosition}
             currentSong={currentSong} PlayPause={PlayPause} queueSongs={queueSongs}/>}></Route>
+
           <Route path='playlist' element={<Playlist isPlaying={isPlaying}
             currentSong={currentSong} PlayPause={PlayPause} queueSongs={queueSongs}/>}></Route>
+
           <Route path='favorites' element={<Favorites isPlaying={isPlaying}
             currentSong={currentSong} PlayPause={PlayPause} queueSongs={queueSongs}
             handleContextMenu={handleContextMenu} handleMenuItemClick={handleMenuItemClick}
             contextMenuVisible={contextMenuVisible} contextMenuPosition={contextMenuPosition}
             favoriteSongs={favoriteSongs} setFavoriteSongs={setFavoriteSongs}/>}></Route>
+
           <Route path='settings' element={<Settings changeTheme={changeTheme} fetchItems={fetchItems}/>}></Route>
+
           <Route path='artist' element={<Artist/>}>
             <Route path=':artist' element={<ArtistView allSongs={allSongs} PlayPause={PlayPause}
-            isPlaying={isPlaying} currentSong={currentSong}/>}></Route>
+            isPlaying={isPlaying} currentSong={currentSong}
+            handleContextMenu={handleContextMenu} handleMenuItemClick={handleMenuItemClick}
+            contextMenuVisible={contextMenuVisible} contextMenuPosition={contextMenuPosition}/>}></Route>
           </Route>
+
           <Route path='album' element={<Album/>}>
             <Route path=':album' element={<AlbumView allSongs={allSongs} PlayPause={PlayPause}
-            isPlaying={isPlaying} currentSong={currentSong} />}></Route>
+            isPlaying={isPlaying} currentSong={currentSong}
+            handleContextMenu={handleContextMenu} handleMenuItemClick={handleMenuItemClick}
+            contextMenuVisible={contextMenuVisible} contextMenuPosition={contextMenuPosition} />}></Route>
           </Route>
+          
         </Route>
       </Routes>
     </BrowserRouter>

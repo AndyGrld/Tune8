@@ -5,6 +5,49 @@ import fs from 'fs'
 let win
 const sqlite3 = require('sqlite3').verbose()
 
+const database = new sqlite3.Database('./database.db');
+database.serialize(() => {
+    database.run(`
+        CREATE TABLE IF NOT EXISTS songs (
+            id INTEGER PRIMARY KEY,
+            title TEXT,
+            artist TEXT,
+            album TEXT,
+            imageSrc TEXT,
+            duration INTEGER,
+            year TEXT,
+            genre TEXT,
+            url TEXT,
+            isFavorite INTEGER DEFAULT 0,
+            dateAdded TEXT DEFAULT CURRENT_TIMESTAMP,
+            lastPlayed TEXT
+        );
+        CREATE TABLE IF NOT EXISTS lyrics (
+            id INTEGER PRIMARY KEY,
+            lyric TEXT,
+            song_id INTEGER,
+            FOREIGN KEY (song_id) REFERENCES songs(id)
+        );
+        CREATE TABLE IF NOT EXISTS playlist (
+            id INTEGER PRIMARY KEY,
+            title TEXT,
+            dateCreated TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS playlist_song (
+            playlist_id INTEGER,
+            song_id INTEGER,
+            FOREIGN KEY (playlist_id) REFERENCES playlist(id),
+            FOREIGN KEY (song_id) REFERENCES songs(id),
+            PRIMARY KEY (playlist_id, song_id)
+        );
+        CREATE TABLE IF NOT EXISTS queue (
+            id INTEGER PRIMARY KEY,
+            song_id INTEGER,
+            FOREIGN KEY (song_id) REFERENCES songs(id)
+        );
+    `)
+})
+
 async function handleDirectoryOpen() {
     try {
         const result = await dialog.showOpenDialog({ properties: ['openDirectory'] });
@@ -250,47 +293,6 @@ ipcMain.on('create-directory', (event, directoryPath) => {
         event.returnValue = false;
     }
 })
-const database = new sqlite3.Database('./database.db');
-database.serialize(() => {
-    database.run(`
-        CREATE TABLE IF NOT EXISTS songs (
-            id INTEGER PRIMARY KEY,
-            title TEXT,
-            artist TEXT,
-            album TEXT,
-            imageSrc TEXT,
-            duration INTEGER,
-            year TEXT,
-            genre TEXT,
-            url TEXT,
-            isFavorite INTEGER DEFAULT 0,
-            dateAdded TEXT DEFAULT CURRENT_TIMESTAMP,
-            lastPlayed TEXT
-        );
-        CREATE TABLE IF NOT EXISTS lyrics(
-            id INTEGER PRIMARY KEY,
-            lyric TEXT,
-            title TEXT,
-            artist TEXT,
-            album TEXT
-        );
-        CREATE TABLE IF NOT EXISTS queue(
-            id INTEGER PRIMARY KEY,
-            title TEXT,
-            artist TEXT,
-            album TEXT,
-            imageSrc TEXT,
-            duration INTEGER,
-            year TEXT,
-            genre TEXT,
-            url TEXT,
-            isFavorite INTEGER DEFAULT 0,
-            dateAdded TEXT DEFAULT CURRENT_TIMESTAMP,
-            lastPlayed TEXT
-        );
-    `)
-})
-
 
 function createWindow(){
     win = new BrowserWindow({
